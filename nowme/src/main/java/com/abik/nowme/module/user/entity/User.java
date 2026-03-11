@@ -23,7 +23,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    String avatar = "🗽";
+    private String avatar = "🗽";
 
     @Column(nullable = false)
     private Long level = 1L;
@@ -32,7 +32,7 @@ public class User {
     private Long experience = 0L;
 
     @Column(nullable = false)
-    Visibility visibility = Visibility.PUBLIC;
+    private Visibility visibility = Visibility.PUBLIC;
 
     @Column(nullable = false)
     private LocalDateTime registerTime = LocalDateTime.now();
