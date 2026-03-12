@@ -29,10 +29,10 @@ public class Nowme {
     private LocalDateTime creation_time = LocalDateTime.now();
 
     @Column(nullable = false)
-    private Long likes;
+    private Long likes = 0L;
 
     @Column(nullable = false)
-    private Long comments;
+    private Long comments = 0L;
 
     @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;
