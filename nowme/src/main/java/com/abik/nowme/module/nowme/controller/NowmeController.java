@@ -15,11 +15,11 @@ public class NowmeController {
     @PostMapping
     public Long createNowme(
             @RequestHeader("Authorization") String token,
-            @RequestBody CreateNowmeDto request) {
+            @RequestBody CreateNowmeDto createNowmeDto) {
 
         Long userId = extractUserIdFromToken(token);
 
-        return nowmeService.createNowme(userId, request);
+        return nowmeService.createNowme(userId, createNowmeDto);
     }
 
     private Long extractUserIdFromToken(String token) {
