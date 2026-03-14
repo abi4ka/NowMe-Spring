@@ -17,8 +17,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public void register(@RequestBody UserDto.RegisterRequest request) {
-        authService.register(request);
+    public UserDto.AuthResponse register(@RequestBody UserDto.RegisterRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/login")

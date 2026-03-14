@@ -6,8 +6,6 @@ import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -15,7 +13,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    public void register(UserDto.RegisterRequest request) {
+    public UserDto.AuthResponse register(UserDto.RegisterRequest request) {
 
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new RuntimeException("Username already exists");
@@ -24,8 +22,10 @@ public class AuthService {
         User user = new User();
         user.setUsername(request.username());
         user.setPassword(request.password());
-
         userRepository.save(user);
+
+        String token = jwtService.generateToken(user.getUsername());
+        return new UserDto.AuthResponse(token);
     }
 
     public UserDto.AuthResponse login(UserDto.LoginRequest request) {
@@ -38,7 +38,6 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user.getUsername());
-
         return new UserDto.AuthResponse(token);
     }
 }
