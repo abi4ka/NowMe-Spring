@@ -23,14 +23,7 @@ public class NowmeController {
             @RequestPart("image") MultipartFile image,
             @RequestPart(value = "description", required = false) String description) {
 
-        Long userId = extractUserIdFromToken(token);
-
-        return nowmeService.createNowme(userId, image, description);
-    }
-
-    private Long extractUserIdFromToken(String token) {
-        //TODO: JWT token
-        return 1L;
+        return nowmeService.createNowme(token, image, description);
     }
 
     @GetMapping("/{id}/image")
