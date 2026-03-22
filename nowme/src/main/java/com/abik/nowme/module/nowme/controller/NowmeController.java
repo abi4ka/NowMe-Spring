@@ -1,9 +1,10 @@
 package com.abik.nowme.module.nowme.controller;
 
-import com.abik.nowme.module.nowme.dto.CreateNowmeDto;
 import com.abik.nowme.module.nowme.service.NowmeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -12,14 +13,15 @@ public class NowmeController {
 
     private final NowmeService nowmeService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Long createNowme(
             @RequestHeader("Authorization") String token,
-            @RequestBody CreateNowmeDto createNowmeDto) {
+            @RequestPart("image") MultipartFile image,
+            @RequestPart(value = "description", required = false) String description) {
 
         Long userId = extractUserIdFromToken(token);
 
-        return nowmeService.createNowme(userId, createNowmeDto);
+        return nowmeService.createNowme(userId, image, description);
     }
 
     private Long extractUserIdFromToken(String token) {
