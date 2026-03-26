@@ -1,6 +1,6 @@
 package com.abik.nowme.module.nowme.service;
 
-import com.abik.nowme.module.nowme.dto.NowmeDto;
+import com.abik.nowme.module.nowme.dto.NowmeDTO;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
@@ -54,7 +54,7 @@ public class NowmeService {
         return nowme.getId();
     }
 
-    public Page<NowmeDto.NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
+    public Page<NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
         String username = jwtService.extractUsername(token);
 
         User user = userRepository.findByUsername(username)
@@ -71,7 +71,7 @@ public class NowmeService {
                         pageable
                 );
 
-        return nowmePage.map(nowme -> new NowmeDto.NowmeDTO(
+        return nowmePage.map(nowme -> new NowmeDTO(
                 nowme.getId(),
                 nowme.getDescription(),
                 nowme.getCreationTime(),
