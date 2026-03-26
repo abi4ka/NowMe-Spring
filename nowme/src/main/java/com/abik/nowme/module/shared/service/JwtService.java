@@ -17,18 +17,18 @@ public class JwtService {
     private static final long ACCESS_EXP = 1000 * 60 * 15 * 8;      // 2h
     private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7 * 4; // 28days
 
-    public String generateAccessToken(String username) {
+    public String generateAccessToken(Long userId) {
         return JWT.create()
-                .withSubject(username)
+                .withSubject(String.valueOf(userId))
                 .withClaim("type", "access")
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_EXP))
                 .sign(algorithm);
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(Long userId) {
         return JWT.create()
-                .withSubject(username)
+                .withSubject(String.valueOf(userId))
                 .withClaim("type", "refresh")
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_EXP))
@@ -45,5 +45,11 @@ public class JwtService {
 
     public String getTokenType(String token) {
         return verify(token).getClaim("type").asString();
+    }
+
+    public Long extractUserId(String token) {
+        return Long.parseLong(
+                verify(token).getSubject()
+        );
     }
 }

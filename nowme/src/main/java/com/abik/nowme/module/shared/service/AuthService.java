@@ -5,6 +5,9 @@ import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -24,7 +27,7 @@ public class AuthService {
         user.setPassword(request.password());
         userRepository.save(user);
 
-        return generateTokens(user.getUsername());
+        return generateTokens(user.getId());
     }
 
     public UserDto.AuthResponse login(UserDto.LoginRequest request) {
@@ -36,15 +39,15 @@ public class AuthService {
             throw new RuntimeException("Wrong password");
         }
 
-        return generateTokens(user.getUsername());
+        return generateTokens(user.getId());
     }
 
     public UserDto.AuthResponse refresh(String accessToken, String refreshToken) {
 
-        String usernameFromRefresh = jwtService.extractUsername(refreshToken);
-        String usernameFromAccess = jwtService.extractUsername(accessToken);
+        Long userIdFromRefresh = jwtService.extractUserId(refreshToken);
+        Long userIdFromAccess = jwtService.extractUserId(accessToken);
 
-        if (!usernameFromRefresh.equals(usernameFromAccess)) {
+        if (!userIdFromRefresh.equals(userIdFromAccess)) {
             throw new RuntimeException("Token mismatch");
         }
 
@@ -52,18 +55,23 @@ public class AuthService {
             throw new RuntimeException("Invalid refresh token");
         }
 
-        if (!refreshTokenService.isValid(usernameFromRefresh, refreshToken)) {
+        if (!refreshTokenService.isValid(userIdFromRefresh, refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
         }
 
-        return generateTokens(usernameFromRefresh);
+        refreshTokenService.deleteByToken(refreshToken);
+
+        return generateTokens(userIdFromRefresh);
     }
 
-    private UserDto.AuthResponse generateTokens(String username) {
-        String access = jwtService.generateAccessToken(username);
-        String refresh = jwtService.generateRefreshToken(username);
+    private UserDto.AuthResponse generateTokens(Long userId) {
 
-        refreshTokenService.save(username, refresh);
+        String access = jwtService.generateAccessToken(userId);
+        String refresh = jwtService.generateRefreshToken(userId);
+
+        Date expiresAt = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L);
+
+        refreshTokenService.save(userId, refresh, expiresAt);
 
         return new UserDto.AuthResponse(access, refresh);
     }
