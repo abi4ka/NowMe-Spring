@@ -3,6 +3,7 @@ package com.abik.nowme.module.shared.controller;
 import com.abik.nowme.module.shared.service.AuthService;
 import com.abik.nowme.module.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,5 +25,15 @@ public class AuthController {
     @PostMapping("/login")
     public UserDto.AuthResponse login(@RequestBody UserDto.LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<UserDto.AuthResponse> refresh(@RequestBody UserDto.RefreshRequest request) {
+        return ResponseEntity.ok(
+                authService.refresh(
+                        request.accessToken(),
+                        request.refreshToken()
+                )
+        );
     }
 }
