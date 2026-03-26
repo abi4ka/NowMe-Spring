@@ -1,9 +1,11 @@
 package com.abik.nowme.module.nowme.controller;
 
+import com.abik.nowme.module.nowme.dto.NowmeDto;
 import com.abik.nowme.module.nowme.service.ImageService;
 import com.abik.nowme.module.nowme.service.NowmeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +35,14 @@ public class NowmeController {
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(resource);
+    }
+
+    @GetMapping
+    public Page<NowmeDto.NowmeDTO> getNowmes(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return nowmeService.getUserNowmesLast7Days(token, page, size);
     }
 }

@@ -26,7 +26,7 @@ public class Nowme {
     private User user;
 
     @Column(nullable = false)
-    private LocalDateTime creation_time = LocalDateTime.now();
+    private LocalDateTime creationTime = LocalDateTime.now();
 
     @Column(nullable = false)
     private Long likes = 0L;

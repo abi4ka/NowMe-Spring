@@ -1,11 +1,15 @@
 package com.abik.nowme.module.nowme.service;
 
+import com.abik.nowme.module.nowme.dto.NowmeDto;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -47,5 +52,33 @@ public class NowmeService {
         nowmeRepository.save(nowme);
 
         return nowme.getId();
+    }
+
+    public Page<NowmeDto.NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
+        String username = jwtService.extractUsername(token);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Nowme> nowmePage = nowmeRepository
+                .findByUserAndCreationTimeAfterOrderByCreationTimeDesc(
+                        user,
+                        sevenDaysAgo,
+                        pageable
+                );
+
+        return nowmePage.map(nowme -> new NowmeDto.NowmeDTO(
+                nowme.getId(),
+                nowme.getDescription(),
+                nowme.getCreationTime(),
+                nowme.getLikes(),
+                nowme.getComments(),
+                nowme.getUser().getUsername(),
+                nowme.getUser().getAvatar()
+        ));
     }
 }
