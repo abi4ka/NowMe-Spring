@@ -1,6 +1,6 @@
 package com.abik.nowme.module.nowme.controller;
 
-import com.abik.nowme.module.nowme.dto.NowmeDto;
+import com.abik.nowme.module.nowme.dto.NowmeDTO;
 import com.abik.nowme.module.nowme.service.ImageService;
 import com.abik.nowme.module.nowme.service.NowmeService;
 import lombok.RequiredArgsConstructor;
@@ -38,11 +38,13 @@ public class NowmeController {
     }
 
     @GetMapping
-    public Page<NowmeDto.NowmeDTO> getNowmes(
+    public Page<NowmeDTO> getNowmes(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return nowmeService.getUserNowmesLast7Days(token, page, size);
+        String cleartoken = token.replace("Bearer ", "");
+
+        return nowmeService.getUserNowmesLast7Days(cleartoken, page, size);
     }
 }

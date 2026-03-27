@@ -13,5 +13,7 @@ public class UserDto {
 
     public record RegisterRequest(String username, String password) {}
     public record LoginRequest(String username, String password) {}
-    public record AuthResponse(String token) {}
+    public record AuthResponse(String accessToken, String refreshToken) {}
+
+    public record RefreshRequest(String accessToken, String refreshToken) {}
 }
