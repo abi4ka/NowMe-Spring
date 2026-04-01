@@ -29,9 +29,10 @@ public class NowmeService {
     private final JwtService jwtService;
 
     public Long createNowme(String token, MultipartFile image, String description) {
-        String username = jwtService.extractUsername(token);
+        String cleanToken = normalizeBearerToken(token);
+        Long userId = jwtService.extractUserId(cleanToken);
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
@@ -55,9 +56,10 @@ public class NowmeService {
     }
 
     public Page<NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
-        String username = jwtService.extractUsername(token);
+        String cleanToken = normalizeBearerToken(token);
+        Long userId = jwtService.extractUserId(cleanToken);
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
@@ -80,5 +82,12 @@ public class NowmeService {
                 nowme.getUser().getUsername(),
                 nowme.getUser().getAvatar()
         ));
+    }
+
+    private String normalizeBearerToken(String token) {
+        if (token == null) {
+            throw new RuntimeException("TOKEN_REQUIRED");
+        }
+        return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 }

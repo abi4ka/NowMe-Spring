@@ -3,6 +3,7 @@ package com.abik.nowme.module.shared.service;
 import com.abik.nowme.module.user.dto.UserDto;
 import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserRepository;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,13 @@ public class AuthService {
     public UserDto.AuthResponse refresh(String accessToken, String refreshToken) {
 
         Long userIdFromRefresh = jwtService.extractUserId(refreshToken);
-        Long userIdFromAccess = jwtService.extractUserId(accessToken);
+        Long userIdFromAccess;
+
+        try {
+            userIdFromAccess = jwtService.extractUserId(accessToken);
+        } catch (TokenExpiredException e) {
+            userIdFromAccess = jwtService.extractUserIdIgnoringExpiration(accessToken);
+        }
 
         if (!userIdFromRefresh.equals(userIdFromAccess)) {
             throw new RuntimeException("Token mismatch");

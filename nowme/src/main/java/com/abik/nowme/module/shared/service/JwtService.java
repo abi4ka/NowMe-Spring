@@ -2,6 +2,7 @@ package com.abik.nowme.module.shared.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.stereotype.Service;
 
@@ -51,5 +52,14 @@ public class JwtService {
         return Long.parseLong(
                 verify(token).getSubject()
         );
+    }
+
+    public Long extractUserIdIgnoringExpiration(String token) {
+        try {
+            String subject = JWT.decode(token).getSubject();
+            return Long.parseLong(subject);
+        } catch (JWTDecodeException | NumberFormatException e) {
+            throw new RuntimeException("INVALID_TOKEN", e);
+        }
     }
 }
