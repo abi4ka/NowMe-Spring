@@ -39,4 +39,8 @@ public class User {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    private Long followers = 0L;
+    private Long following = 0L;
+
 }
