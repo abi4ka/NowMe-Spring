@@ -17,14 +17,14 @@ public class FollowService {
     private final JwtService jwtService;
 
     public void follow(String token, Long userIdToFollow) {
+        String cleanToken = normalizeBearerToken(token);
+        Long followerId = jwtService.extractUserId(cleanToken);
 
-        String username = jwtService.extractUsername(token);
-
-        User follower = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         User user = userRepository.findById(userIdToFollow)
-                .orElseThrow(() -> new RuntimeException("User to follow not found"));
+                .orElseThrow(() -> new RuntimeException("USER_TO_FOLLOW_NOT_FOUND"));
 
         if (follower.getId().equals(user.getId())) {
             throw new RuntimeException("You can not follow yourself");
@@ -40,8 +40,14 @@ public class FollowService {
 
         followRepository.save(follow);
 
-
         userRepository.save(user);
         userRepository.save(follower);
+    }
+
+    private String normalizeBearerToken(String token) {
+        if (token == null) {
+            throw new RuntimeException("TOKEN_REQUIRED");
+        }
+        return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 }
