@@ -30,7 +30,7 @@ public class FollowService {
             throw new RuntimeException("You can not follow yourself");
         }
 
-        if (followRepository.existsByUser_IdAndFollower_Id(user.getId(), follower.getId())) {
+        if (followRepository.existsByFollowing_IdAndFollower_Id(user.getId(), follower.getId())) {
             throw new RuntimeException("You are already following");
         }
 
