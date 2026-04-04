@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,7 +41,9 @@ public class User {
     @Column(nullable = false)
     private boolean active = true;
 
-    private Long followers = 0L;
-    private Long following = 0L;
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY)
+    private List<Follow> following;
 
+    @OneToMany(mappedBy = "following", fetch = FetchType.LAZY)
+    private List<Follow> followers;
 }
