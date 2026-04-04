@@ -43,8 +43,6 @@ public class NowmeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        String cleartoken = token.replace("Bearer ", "");
-
-        return nowmeService.getUserNowmesLast7Days(cleartoken, page, size);
+        return nowmeService.getUserNowmesLast7Days(token, page, size);
     }
 }
