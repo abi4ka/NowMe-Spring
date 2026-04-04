@@ -7,20 +7,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "user_follow")
+@Table(name = "follows", uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "following_id"}))
 public class UserFollow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Usuario que es seguido
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "following_id", nullable = false)
+    private User following;
 
-    // Usuario que sigue
     @ManyToOne
-    @JoinColumn(name = "follower_id")
+    @JoinColumn(name = "follower_id", nullable = false)
     private User follower;
 }
