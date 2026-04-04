@@ -18,11 +18,22 @@ public class FollowController {
             @PathVariable Long userId
     ) {
 
-        // limpiar token
         String cleanToken = token.replace("Bearer ", "");
 
         followService.follow(cleanToken, userId);
 
         return ResponseEntity.ok("OK");
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<String> unfollow(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long userId
+    ) {
+        String cleanToken = token.replace("Bearer ", "");
+
+        followService.unfollow(cleanToken, userId);
+
+        return ResponseEntity.ok("UNFOLLOW OK");
     }
 }

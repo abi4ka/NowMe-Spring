@@ -5,6 +5,7 @@ import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.entity.Follow;
 import com.abik.nowme.module.user.repository.UserFollowRepository;
 import com.abik.nowme.module.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,10 +45,29 @@ public class FollowService {
         userRepository.save(follower);
     }
 
+    @Transactional
+    public void unfollow(String token, Long userIdToUnfollow) {
+        String cleanToken = normalizeBearerToken(token);
+        Long followerId = jwtService.extractUserId(cleanToken);
+
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        User user = userRepository.findById(userIdToUnfollow)
+                .orElseThrow(() -> new RuntimeException("USER_TO_UNFOLLOW_NOT_FOUND"));
+
+        if (!followRepository.existsByFollowing_IdAndFollower_Id(user.getId(), follower.getId())) {
+            throw new RuntimeException("YOU_ARE_NOT_FOLLOWING_THIS_USER");
+        }
+
+        followRepository.deleteByFollowing_IdAndFollower_Id(user.getId(), follower.getId());
+    }
+
     private String normalizeBearerToken(String token) {
         if (token == null) {
             throw new RuntimeException("TOKEN_REQUIRED");
         }
         return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
+
 }
