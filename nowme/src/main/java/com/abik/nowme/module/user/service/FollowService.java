@@ -2,7 +2,7 @@ package com.abik.nowme.module.user.service;
 
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.entity.User;
-import com.abik.nowme.module.user.entity.UserFollow;
+import com.abik.nowme.module.user.entity.Follow;
 import com.abik.nowme.module.user.repository.UserFollowRepository;
 import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class FollowService {
             throw new RuntimeException("You are already following");
         }
 
-        UserFollow follow = new UserFollow();
+        Follow follow = new Follow();
         follow.setUser(user);
         follow.setFollower(follower);
 
