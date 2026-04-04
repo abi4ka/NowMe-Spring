@@ -7,33 +7,25 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/follow")
 public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/{userId}")
+    @PostMapping("/follow/{userId}")
     public ResponseEntity<String> follow(
             @RequestHeader("Authorization") String token,
             @PathVariable Long userId
     ) {
-
-        String cleanToken = token.replace("Bearer ", "");
-
-        followService.follow(cleanToken, userId);
-
-        return ResponseEntity.ok("OK");
+        followService.follow(token, userId);
+        return ResponseEntity.ok("FOLLOW OK");
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/unfollow/{userId}")
     public ResponseEntity<String> unfollow(
             @RequestHeader("Authorization") String token,
             @PathVariable Long userId
     ) {
-        String cleanToken = token.replace("Bearer ", "");
-
-        followService.unfollow(cleanToken, userId);
-
+        followService.unfollow(token, userId);
         return ResponseEntity.ok("UNFOLLOW OK");
     }
 }
