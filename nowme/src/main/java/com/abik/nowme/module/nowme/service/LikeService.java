@@ -1,0 +1,58 @@
+package com.abik.nowme.module.nowme.service;
+
+import com.abik.nowme.module.nowme.entity.Nowme;
+import com.abik.nowme.module.nowme.entity.NowmeLike;
+import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
+import com.abik.nowme.module.nowme.repository.NowmeRepository;
+import com.abik.nowme.module.shared.service.JwtService;
+import com.abik.nowme.module.user.entity.User;
+import com.abik.nowme.module.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class LikeService {
+
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final NowmeRepository nowmeRepository;
+    private final NowmeLikeRepository likeRepository;
+
+    public Long toggleLike(String token, Long nowmeId) {
+        String cleanToken = normalizeBearerToken(token);
+        Long userId = jwtService.extractUserId(cleanToken);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        Nowme nowme = nowmeRepository.findById(nowmeId)
+                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        var existingLike = likeRepository.findByUserIdAndNowmeId(userId, nowmeId);
+
+        if (existingLike.isPresent()) {
+            likeRepository.delete(existingLike.get());
+        } else {
+            NowmeLike like = NowmeLike.builder()
+                    .user(user)
+                    .nowme(nowme)
+                    .build();
+            likeRepository.save(like);
+        }
+
+        Long likesCount = likeRepository.countByNowmeId(nowmeId);
+
+        nowme.setLikes(likesCount);
+        nowmeRepository.save(nowme);
+
+        return likesCount;
+    }
+
+    private String normalizeBearerToken(String token) {
+        if (token == null) {
+            throw new RuntimeException("TOKEN_REQUIRED");
+        }
+        return token.startsWith("Bearer ") ? token.substring(7) : token;
+    }
+}
