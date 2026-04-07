@@ -2,6 +2,7 @@ package com.abik.nowme.module.nowme.controller;
 
 import com.abik.nowme.module.nowme.dto.NowmeDTO;
 import com.abik.nowme.module.nowme.service.ImageService;
+import com.abik.nowme.module.nowme.service.LikeService;
 import com.abik.nowme.module.nowme.service.NowmeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -18,6 +19,7 @@ public class NowmeController {
 
     private final NowmeService nowmeService;
     private final ImageService imageService;
+    private final LikeService likeService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Long createNowme(
@@ -44,5 +46,23 @@ public class NowmeController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return nowmeService.getUserNowmesLast7Days(token, page, size);
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Long> like(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        Long likes = likeService.like(token, id);
+        return ResponseEntity.ok(likes);
+    }
+
+    @DeleteMapping("/{id}/unlike")
+    public ResponseEntity<Long> unlike(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        Long likes = likeService.unlike(token, id);
+        return ResponseEntity.ok(likes);
     }
 }
