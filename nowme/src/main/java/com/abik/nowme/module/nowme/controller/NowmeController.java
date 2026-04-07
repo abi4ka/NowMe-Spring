@@ -53,7 +53,16 @@ public class NowmeController {
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
     ) {
-        Long likes = likeService.toggleLike(token, id);
+        Long likes = likeService.like(token, id);
+        return ResponseEntity.ok(likes);
+    }
+
+    @DeleteMapping("/{id}/unlike")
+    public ResponseEntity<Long> unlike(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        Long likes = likeService.unlike(token, id);
         return ResponseEntity.ok(likes);
     }
 }

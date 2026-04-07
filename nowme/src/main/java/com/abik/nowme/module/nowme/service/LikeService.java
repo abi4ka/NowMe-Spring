@@ -19,7 +19,7 @@ public class LikeService {
     private final NowmeRepository nowmeRepository;
     private final NowmeLikeRepository likeRepository;
 
-    public Long toggleLike(String token, Long nowmeId) {
+    public Long like(String token, Long nowmeId) {
         String cleanToken = normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
@@ -32,16 +32,36 @@ public class LikeService {
         var existingLike = likeRepository.findByUserIdAndNowmeId(userId, nowmeId);
 
         if (existingLike.isPresent()) {
-            likeRepository.delete(existingLike.get());
-        } else {
-            NowmeLike like = NowmeLike.builder()
-                    .user(user)
-                    .nowme(nowme)
-                    .build();
-            likeRepository.save(like);
+            throw new RuntimeException("ALREADY_LIKED");
         }
 
+        NowmeLike like = NowmeLike.builder()
+                .user(user)
+                .nowme(nowme)
+                .build();
+
+        likeRepository.save(like);
+
         Long likesCount = likeRepository.countByNowmeId(nowmeId);
+
+        nowme.setLikes(likesCount);
+        nowmeRepository.save(nowme);
+
+        return likesCount;
+    }
+
+    public Long unlike(String token, Long nowmeId) {
+        String cleanToken = normalizeBearerToken(token);
+        Long userId = jwtService.extractUserId(cleanToken);
+
+        NowmeLike like = likeRepository.findByUserIdAndNowmeId(userId, nowmeId)
+                .orElseThrow(() -> new RuntimeException("LIKE_NOT_FOUND"));
+
+        likeRepository.delete(like);
+        Long likesCount = likeRepository.countByNowmeId(nowmeId);
+
+        Nowme nowme = nowmeRepository.findById(nowmeId)
+                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
 
         nowme.setLikes(likesCount);
         nowmeRepository.save(nowme);
