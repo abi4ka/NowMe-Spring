@@ -1,6 +1,7 @@
 package com.abik.nowme.module.comment.controller;
 
 import com.abik.nowme.module.comment.dto.CommentDto;
+import com.abik.nowme.module.comment.dto.CommentRequest;
 import com.abik.nowme.module.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,14 @@ public class CommentController {
     public ResponseEntity<CommentDto> comment(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody String content
+            @RequestBody CommentRequest request
     ) {
 
-        CommentDto response = commentService.createComment(token, id, content);
+        CommentDto response = commentService.createComment(
+                token,
+                id,
+                request.content()
+        );
 
         return ResponseEntity.ok(response);
     }
