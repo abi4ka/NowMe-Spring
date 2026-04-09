@@ -21,7 +21,7 @@ public class CommentService {
     private final JwtService jwtService;
 
     public CommentDto createComment(String token, Long nowmeId, String content) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         User user = userRepository.findById(userId)
@@ -46,12 +46,5 @@ public class CommentService {
                 user.getUsername(),
                 comment.getContent()
         );
-    }
-
-    private String normalizeBearerToken(String token) {
-        if (token == null) {
-            throw new RuntimeException("TOKEN_REQUIRED");
-        }
-        return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 }

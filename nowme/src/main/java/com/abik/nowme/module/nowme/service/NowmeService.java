@@ -37,7 +37,7 @@ public class NowmeService {
     private final CommentRepository commentRepository;
 
     public Long createNowme(String token, MultipartFile image, String description) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         User user = userRepository.findById(userId)
@@ -64,7 +64,7 @@ public class NowmeService {
     }
 
     public Page<NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         User user = userRepository.findById(userId)
@@ -107,12 +107,5 @@ public class NowmeService {
                 nowme.getUser().getUsername(),
                 nowme.getUser().getAvatar()
         ));
-    }
-
-    private String normalizeBearerToken(String token) {
-        if (token == null) {
-            throw new RuntimeException("TOKEN_REQUIRED");
-        }
-        return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 }
