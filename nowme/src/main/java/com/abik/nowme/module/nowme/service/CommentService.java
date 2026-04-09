@@ -1,0 +1,58 @@
+package com.abik.nowme.module.nowme.service;
+
+import com.abik.nowme.module.nowme.dto.CommentDto;
+import com.abik.nowme.module.nowme.entity.Comment;
+import com.abik.nowme.module.nowme.repository.CommentRepository;
+import com.abik.nowme.module.nowme.entity.Nowme;
+import com.abik.nowme.module.nowme.repository.NowmeRepository;
+import com.abik.nowme.module.shared.service.JwtService;
+import com.abik.nowme.module.user.entity.User;
+import com.abik.nowme.module.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CommentService {
+
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final NowmeRepository nowmeRepository;
+    private final JwtService jwtService;
+
+    public CommentDto createComment(String token, Long nowmeId, String content) {
+        String cleanToken = normalizeBearerToken(token);
+        Long userId = jwtService.extractUserId(cleanToken);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        Nowme nowme = nowmeRepository.findById(nowmeId)
+                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        Comment comment = new Comment();
+        comment.setUser(user);
+        comment.setNowme(nowme);
+        comment.setContent(content);
+
+        commentRepository.save(comment);
+
+        nowme.setComments(nowme.getComments() + 1);
+        nowmeRepository.save(nowme);
+
+        return new CommentDto(
+                comment.getId(),
+                user.getId(),
+                user.getAvatar(),
+                user.getUsername(),
+                comment.getContent()
+        );
+    }
+
+    private String normalizeBearerToken(String token) {
+        if (token == null) {
+            throw new RuntimeException("TOKEN_REQUIRED");
+        }
+        return token.startsWith("Bearer ") ? token.substring(7) : token;
+    }
+}
