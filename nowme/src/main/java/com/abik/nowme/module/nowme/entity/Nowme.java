@@ -39,4 +39,7 @@ public class Nowme {
 
     @Column(nullable = true)
     private String description;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

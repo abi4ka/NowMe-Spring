@@ -38,12 +38,12 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime registerTime = LocalDateTime.now();
 
-    @Column(nullable = false)
-    private boolean active = true;
-
     @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY)
     private List<Follow> following;
 
     @OneToMany(mappedBy = "following", fetch = FetchType.LAZY)
     private List<Follow> followers;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }
