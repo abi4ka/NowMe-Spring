@@ -44,7 +44,6 @@ public class LikeService {
 
         Long likesCount = likeRepository.countByNowmeId(nowmeId);
 
-        nowme.setLikes(likesCount);
         nowmeRepository.save(nowme);
 
         return likesCount;
@@ -63,7 +62,6 @@ public class LikeService {
         Nowme nowme = nowmeRepository.findById(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
 
-        nowme.setLikes(likesCount);
         nowmeRepository.save(nowme);
 
         return likesCount;

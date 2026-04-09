@@ -61,7 +61,7 @@ public class NowmeController {
         return ResponseEntity.ok(likes);
     }
 
-    @DeleteMapping("/{id}/unlike")
+    @DeleteMapping("/{id}/like")
     public ResponseEntity<Long> unlike(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
@@ -76,13 +76,7 @@ public class NowmeController {
             @PathVariable Long id,
             @RequestBody CommentRequest request
     ) {
-
-        CommentDto response = commentService.createComment(
-                token,
-                id,
-                request.content()
-        );
-
+        CommentDto response = commentService.createComment(token, id, request.content());
         return ResponseEntity.ok(response);
     }
 }

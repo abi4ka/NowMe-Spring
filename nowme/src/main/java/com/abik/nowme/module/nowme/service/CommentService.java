@@ -37,7 +37,6 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        nowme.setComments(nowme.getComments() + 1);
         nowmeRepository.save(nowme);
 
         return new CommentDto(
