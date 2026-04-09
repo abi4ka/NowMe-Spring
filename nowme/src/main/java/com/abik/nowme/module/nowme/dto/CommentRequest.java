@@ -1,3 +1,3 @@
-package com.abik.nowme.module.comment.dto;
+package com.abik.nowme.module.nowme.dto;
 
 public record CommentRequest(String content) {}

@@ -1,6 +1,6 @@
-package com.abik.nowme.module.comment.repository;
+package com.abik.nowme.module.nowme.repository;
 
-import com.abik.nowme.module.comment.entity.Comment;
+import com.abik.nowme.module.nowme.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

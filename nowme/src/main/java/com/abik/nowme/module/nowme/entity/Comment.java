@@ -1,6 +1,5 @@
-package com.abik.nowme.module.comment.entity;
+package com.abik.nowme.module.nowme.entity;
 
-import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

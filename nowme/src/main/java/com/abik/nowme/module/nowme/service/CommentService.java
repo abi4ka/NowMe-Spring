@@ -1,8 +1,8 @@
-package com.abik.nowme.module.comment.service;
+package com.abik.nowme.module.nowme.service;
 
-import com.abik.nowme.module.comment.dto.CommentDto;
-import com.abik.nowme.module.comment.entity.Comment;
-import com.abik.nowme.module.comment.repository.CommentRepository;
+import com.abik.nowme.module.nowme.dto.CommentDto;
+import com.abik.nowme.module.nowme.entity.Comment;
+import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
