@@ -6,12 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/follow")
 @RequiredArgsConstructor
 public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/follow/{userId}")
+    @PostMapping("/{userId}")
     public ResponseEntity<String> follow(
             @RequestHeader("Authorization") String token,
             @PathVariable Long userId
@@ -20,7 +21,7 @@ public class FollowController {
         return ResponseEntity.ok("FOLLOW OK");
     }
 
-    @DeleteMapping("/unfollow/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<String> unfollow(
             @RequestHeader("Authorization") String token,
             @PathVariable Long userId

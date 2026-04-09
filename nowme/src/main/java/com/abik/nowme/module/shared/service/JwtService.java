@@ -62,4 +62,11 @@ public class JwtService {
             throw new RuntimeException("INVALID_TOKEN", e);
         }
     }
+
+    public String normalizeBearerToken(String token) {
+        if (token == null) {
+            throw new RuntimeException("TOKEN_REQUIRED");
+        }
+        return token.startsWith("Bearer ") ? token.substring(7) : token;
+    }
 }

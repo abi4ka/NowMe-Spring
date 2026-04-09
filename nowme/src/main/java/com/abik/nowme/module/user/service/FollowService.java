@@ -18,7 +18,7 @@ public class FollowService {
     private final JwtService jwtService;
 
     public void follow(String token, Long userIdToFollow) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long followerId = jwtService.extractUserId(cleanToken);
 
         User follower = userRepository.findById(followerId)
@@ -44,7 +44,7 @@ public class FollowService {
 
     @Transactional
     public void unfollow(String token, Long userIdToUnfollow) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long followerId = jwtService.extractUserId(cleanToken);
 
         User follower = userRepository.findById(followerId)
@@ -59,12 +59,4 @@ public class FollowService {
 
         followRepository.deleteByFollowing_IdAndFollower_Id(user.getId(), follower.getId());
     }
-
-    private String normalizeBearerToken(String token) {
-        if (token == null) {
-            throw new RuntimeException("TOKEN_REQUIRED");
-        }
-        return token.startsWith("Bearer ") ? token.substring(7) : token;
-    }
-
 }

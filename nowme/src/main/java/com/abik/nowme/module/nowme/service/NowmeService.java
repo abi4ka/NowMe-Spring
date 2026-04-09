@@ -2,6 +2,8 @@ package com.abik.nowme.module.nowme.service;
 
 import com.abik.nowme.module.nowme.dto.NowmeDTO;
 import com.abik.nowme.module.nowme.entity.Nowme;
+import com.abik.nowme.module.nowme.repository.CommentRepository;
+import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.entity.User;
@@ -18,7 +20,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +33,11 @@ public class NowmeService {
     private final NowmeRepository nowmeRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final NowmeLikeRepository nowmeLikeRepository;
+    private final CommentRepository commentRepository;
 
     public Long createNowme(String token, MultipartFile image, String description) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         User user = userRepository.findById(userId)
@@ -56,7 +64,7 @@ public class NowmeService {
     }
 
     public Page<NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         User user = userRepository.findById(userId)
@@ -73,21 +81,31 @@ public class NowmeService {
                         pageable
                 );
 
+        List<Long> nowmeIds = nowmePage.getContent().stream()
+                .map(Nowme::getId)
+                .toList();
+
+        Map<Long, Long> likeCounts = nowmeIds.isEmpty()
+                ? Collections.emptyMap()
+                : nowmeLikeRepository.countByNowmeIdIn(nowmeIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+        Map<Long, Long> commentCounts = nowmeIds.isEmpty()
+                ? Collections.emptyMap()
+                : commentRepository.countByNowmeIdIn(nowmeIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+        final Map<Long, Long> likeCountsFinal = likeCounts;
+        final Map<Long, Long> commentCountsFinal = commentCounts;
+
         return nowmePage.map(nowme -> new NowmeDTO(
                 nowme.getId(),
                 nowme.getDescription(),
                 nowme.getCreationTime(),
-                nowme.getLikes(),
-                nowme.getComments(),
+                likeCountsFinal.getOrDefault(nowme.getId(), 0L),
+                commentCountsFinal.getOrDefault(nowme.getId(), 0L),
                 nowme.getUser().getUsername(),
                 nowme.getUser().getAvatar()
         ));
-    }
-
-    private String normalizeBearerToken(String token) {
-        if (token == null) {
-            throw new RuntimeException("TOKEN_REQUIRED");
-        }
-        return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 }

@@ -20,7 +20,7 @@ public class LikeService {
     private final NowmeLikeRepository likeRepository;
 
     public Long like(String token, Long nowmeId) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         User user = userRepository.findById(userId)
@@ -44,14 +44,13 @@ public class LikeService {
 
         Long likesCount = likeRepository.countByNowmeId(nowmeId);
 
-        nowme.setLikes(likesCount);
         nowmeRepository.save(nowme);
 
         return likesCount;
     }
 
     public Long unlike(String token, Long nowmeId) {
-        String cleanToken = normalizeBearerToken(token);
+        String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
         NowmeLike like = likeRepository.findByUserIdAndNowmeId(userId, nowmeId)
@@ -63,16 +62,8 @@ public class LikeService {
         Nowme nowme = nowmeRepository.findById(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
 
-        nowme.setLikes(likesCount);
         nowmeRepository.save(nowme);
 
         return likesCount;
-    }
-
-    private String normalizeBearerToken(String token) {
-        if (token == null) {
-            throw new RuntimeException("TOKEN_REQUIRED");
-        }
-        return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
 }
