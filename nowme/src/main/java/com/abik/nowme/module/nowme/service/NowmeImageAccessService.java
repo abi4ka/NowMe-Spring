@@ -24,23 +24,31 @@ public class NowmeImageAccessService {
     }
 
     public boolean hasAccess(Long userId, Nowme nowme) {
+        return hasAccess(userId, nowme, true);
+    }
+
+    public boolean hasFeedAccess(Long userId, Nowme nowme) {
+        return hasAccess(userId, nowme, false);
+    }
+
+    private boolean hasAccess(Long userId, Nowme nowme, boolean allowFavorite) {
         Long authorId = nowme.getUser().getId();
         Visibility visibility = nowme.getVisibility();
         boolean isFavorite = Boolean.TRUE.equals(nowme.getFavorite());
         boolean isFresh = !nowme.getCreationTime().isBefore(LocalDateTime.now().minusDays(7));
 
         if (authorId.equals(userId)) {
-            return true;
+            return allowFavorite || isFresh;
         }
 
         if (visibility == Visibility.PUBLIC) {
-            return isFresh || isFavorite;
+            return isFresh || (allowFavorite && isFavorite);
         }
 
         boolean isFriend = friendshipService.areFriends(userId, authorId);
 
         if (isFriend && visibility == Visibility.FRIENDS_ONLY) {
-            return isFresh || isFavorite;
+            return isFresh || (allowFavorite && isFavorite);
         }
 
         return false;

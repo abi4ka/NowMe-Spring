@@ -7,9 +7,11 @@ import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.entity.User;
+import com.abik.nowme.module.user.repository.UserFollowRepository;
 import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,11 +21,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,9 +34,11 @@ public class NowmeService {
 
     private final NowmeRepository nowmeRepository;
     private final UserRepository userRepository;
+    private final UserFollowRepository userFollowRepository;
     private final JwtService jwtService;
     private final NowmeLikeRepository nowmeLikeRepository;
     private final CommentRepository commentRepository;
+    private final NowmeImageAccessService nowmeImageAccessService;
 
     public Long createNowme(String token, MultipartFile image, String description) {
         String cleanToken = jwtService.normalizeBearerToken(token);
@@ -67,21 +71,30 @@ public class NowmeService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
 
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<Long> authorIds = Stream.concat(
+                        Stream.of(userId),
+                        userFollowRepository.findFollowingIdsByFollowerId(userId).stream()
+                )
+                .distinct()
+                .toList();
+
+        List<Nowme> availableNowmes = nowmeRepository.findByUser_IdInOrderByCreationTimeDesc(authorIds).stream()
+                .filter(nowme -> nowmeImageAccessService.hasFeedAccess(userId, nowme))
+                .toList();
 
         Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), availableNowmes.size());
 
-        Page<Nowme> nowmePage = nowmeRepository
-                .findByUserAndCreationTimeAfterOrderByCreationTimeDesc(
-                        user,
-                        sevenDaysAgo,
-                        pageable
-                );
+        List<Nowme> pageContent = start >= availableNowmes.size()
+                ? Collections.emptyList()
+                : availableNowmes.subList(start, end);
 
-        List<Long> nowmeIds = nowmePage.getContent().stream()
+        List<Long> nowmeIds = pageContent.stream()
                 .map(Nowme::getId)
                 .toList();
 
@@ -98,14 +111,18 @@ public class NowmeService {
         final Map<Long, Long> likeCountsFinal = likeCounts;
         final Map<Long, Long> commentCountsFinal = commentCounts;
 
-        return nowmePage.map(nowme -> new NowmeDTO(
-                nowme.getId(),
-                nowme.getDescription(),
-                nowme.getCreationTime(),
-                likeCountsFinal.getOrDefault(nowme.getId(), 0L),
-                commentCountsFinal.getOrDefault(nowme.getId(), 0L),
-                nowme.getUser().getUsername(),
-                nowme.getUser().getAvatar()
-        ));
+        List<NowmeDTO> content = pageContent.stream()
+                .map(nowme -> new NowmeDTO(
+                        nowme.getId(),
+                        nowme.getDescription(),
+                        nowme.getCreationTime(),
+                        likeCountsFinal.getOrDefault(nowme.getId(), 0L),
+                        commentCountsFinal.getOrDefault(nowme.getId(), 0L),
+                        nowme.getUser().getUsername(),
+                        nowme.getUser().getAvatar()
+                ))
+                .toList();
+
+        return new PageImpl<>(content, pageable, availableNowmes.size());
     }
 }
