@@ -35,8 +35,11 @@ public class NowmeController {
     }
 
     @GetMapping("/{id}/image")
-    public ResponseEntity<Resource> getImage(@PathVariable Long id) {
-        Resource resource = imageService.getNowmeImageById(id);
+    public ResponseEntity<Resource> getImage(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        Resource resource = imageService.getNowmeImageById(token, id);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_JPEG)
