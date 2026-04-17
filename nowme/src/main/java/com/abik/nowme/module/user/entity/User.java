@@ -27,12 +27,6 @@ public class User {
     private String avatar = "🗽";
 
     @Column(nullable = false)
-    private Long level = 1L;
-
-    @Column(nullable = false)
-    private Long experience = 0L;
-
-    @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;
 
     @Column(nullable = false)
