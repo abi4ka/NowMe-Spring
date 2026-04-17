@@ -82,7 +82,7 @@ public class NowmeService {
                 .distinct()
                 .toList();
 
-        List<Nowme> availableNowmes = nowmeRepository.findByUser_IdInOrderByCreationTimeDesc(authorIds).stream()
+        List<Nowme> availableNowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(authorIds).stream()
                 .filter(nowme -> nowmeImageAccessService.hasFeedAccess(userId, nowme))
                 .toList();
 

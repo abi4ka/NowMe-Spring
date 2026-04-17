@@ -33,7 +33,7 @@ public class ImageService {
             throw new RuntimeException("USER_NOT_FOUND");
         }
 
-        Nowme nowme = nowmeRepository.findById(id)
+        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
 
         if (!nowmeImageAccessService.hasAccess(userId, nowme)) {
