@@ -32,6 +32,10 @@ public class NowmeImageAccessService {
     }
 
     private boolean hasAccess(Long userId, Nowme nowme, boolean allowFavorite) {
+        if (!nowme.getUser().isActive()) {
+            return false;
+        }
+
         Long authorId = nowme.getUser().getId();
         Visibility visibility = nowme.getVisibility();
         boolean isFavorite = Boolean.TRUE.equals(nowme.getFavorite());

@@ -23,11 +23,15 @@ public class LikeService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         Nowme nowme = nowmeRepository.findById(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        if (!nowme.getUser().isActive()) {
+            throw new RuntimeException("NOWME_NOT_FOUND");
+        }
 
         var existingLike = likeRepository.findByUserIdAndNowmeId(userId, nowmeId);
 
@@ -53,6 +57,10 @@ public class LikeService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
+        if (!userRepository.existsByIdAndActiveTrue(userId)) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
+
         NowmeLike like = likeRepository.findByUserIdAndNowmeId(userId, nowmeId)
                 .orElseThrow(() -> new RuntimeException("LIKE_NOT_FOUND"));
 
@@ -61,6 +69,10 @@ public class LikeService {
 
         Nowme nowme = nowmeRepository.findById(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        if (!nowme.getUser().isActive()) {
+            throw new RuntimeException("NOWME_NOT_FOUND");
+        }
 
         nowmeRepository.save(nowme);
 

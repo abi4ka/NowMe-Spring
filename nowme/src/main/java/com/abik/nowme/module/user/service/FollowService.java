@@ -21,10 +21,10 @@ public class FollowService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long followerId = jwtService.extractUserId(cleanToken);
 
-        User follower = userRepository.findById(followerId)
+        User follower = userRepository.findByIdAndActiveTrue(followerId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        User user = userRepository.findById(userIdToFollow)
+        User user = userRepository.findByIdAndActiveTrue(userIdToFollow)
                 .orElseThrow(() -> new RuntimeException("USER_TO_FOLLOW_NOT_FOUND"));
 
         if (follower.getId().equals(user.getId())) {
@@ -47,10 +47,10 @@ public class FollowService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long followerId = jwtService.extractUserId(cleanToken);
 
-        User follower = userRepository.findById(followerId)
+        User follower = userRepository.findByIdAndActiveTrue(followerId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        User user = userRepository.findById(userIdToUnfollow)
+        User user = userRepository.findByIdAndActiveTrue(userIdToUnfollow)
                 .orElseThrow(() -> new RuntimeException("USER_TO_UNFOLLOW_NOT_FOUND"));
 
         if (!followRepository.existsByFollowing_IdAndFollower_Id(user.getId(), follower.getId())) {

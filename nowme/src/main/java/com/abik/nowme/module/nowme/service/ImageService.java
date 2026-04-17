@@ -3,6 +3,7 @@ package com.abik.nowme.module.nowme.service;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
+import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -22,10 +23,15 @@ public class ImageService {
     private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
     private final NowmeImageAccessService nowmeImageAccessService;
+    private final UserRepository userRepository;
 
     public Resource getNowmeImageById(String token, Long id) {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
+
+        if (!userRepository.existsByIdAndActiveTrue(userId)) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
 
         Nowme nowme = nowmeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
