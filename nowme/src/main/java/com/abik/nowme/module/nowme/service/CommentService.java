@@ -24,11 +24,15 @@ public class CommentService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        Nowme nowme = nowmeRepository.findById(nowmeId)
+        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        if (!nowme.getUser().isActive()) {
+            throw new RuntimeException("NOWME_NOT_FOUND");
+        }
 
         Comment comment = new Comment();
         comment.setUser(user);

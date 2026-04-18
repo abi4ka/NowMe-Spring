@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Data
@@ -16,4 +18,17 @@ public class UserDto {
     public record AuthResponse(String accessToken, String refreshToken) {}
 
     public record RefreshRequest(String accessToken, String refreshToken) {}
+
+    public record ProfileResponse(
+            Long id,
+            String username,
+            String avatar,
+            LocalDateTime registerTime,
+            long followersCount,
+            long followingCount,
+            long friends,
+            boolean me,
+            boolean following,
+            boolean friend
+    ) {}
 }

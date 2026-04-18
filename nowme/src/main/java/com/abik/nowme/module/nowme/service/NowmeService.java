@@ -44,7 +44,7 @@ public class NowmeService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
@@ -71,7 +71,7 @@ public class NowmeService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
-        if (!userRepository.existsById(userId)) {
+        if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
 
@@ -82,7 +82,7 @@ public class NowmeService {
                 .distinct()
                 .toList();
 
-        List<Nowme> availableNowmes = nowmeRepository.findByUser_IdInOrderByCreationTimeDesc(authorIds).stream()
+        List<Nowme> availableNowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(authorIds).stream()
                 .filter(nowme -> nowmeImageAccessService.hasFeedAccess(userId, nowme))
                 .toList();
 

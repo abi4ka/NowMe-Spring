@@ -17,7 +17,7 @@ public class NowmeImageAccessService {
     private final FriendshipService friendshipService;
 
     public boolean hasAccess(Long userId, Long nowmeId) {
-        Nowme nowme = nowmeRepository.findById(nowmeId)
+        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
 
         return hasAccess(userId, nowme);
@@ -32,6 +32,10 @@ public class NowmeImageAccessService {
     }
 
     private boolean hasAccess(Long userId, Nowme nowme, boolean allowFavorite) {
+        if (!nowme.isActive() || !nowme.getUser().isActive()) {
+            return false;
+        }
+
         Long authorId = nowme.getUser().getId();
         Visibility visibility = nowme.getVisibility();
         boolean isFavorite = Boolean.TRUE.equals(nowme.getFavorite());

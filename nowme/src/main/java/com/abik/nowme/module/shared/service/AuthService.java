@@ -33,7 +33,7 @@ public class AuthService {
 
     public UserDto.AuthResponse login(UserDto.LoginRequest request) {
 
-        User user = userRepository.findByUsername(request.username())
+        User user = userRepository.findByUsernameAndActiveTrue(request.username())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!user.getPassword().equals(request.password())) {
@@ -64,6 +64,10 @@ public class AuthService {
 
         if (!refreshTokenService.isValid(userIdFromRefresh, refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
+        }
+
+        if (!userRepository.existsByIdAndActiveTrue(userIdFromRefresh)) {
+            throw new RuntimeException("USER_NOT_FOUND");
         }
 
         refreshTokenService.deleteByToken(refreshToken);
