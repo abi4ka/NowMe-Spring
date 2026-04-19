@@ -16,4 +16,12 @@ public interface NowmeLikeRepository extends JpaRepository<NowmeLike, Long> {
 
     @Query("SELECT nl.nowme.id, COUNT(nl) FROM NowmeLike nl WHERE nl.nowme.id IN :nowmeIds GROUP BY nl.nowme.id")
     List<Object[]> countByNowmeIdIn(@Param("nowmeIds") List<Long> nowmeIds);
+
+    @Query("""
+    SELECT nl.nowme.id
+    FROM NowmeLike nl
+    WHERE nl.user.id = :userId AND nl.nowme.id IN :nowmeIds
+    """)
+    List<Long> findLikedNowmeIds(@Param("userId") Long userId,
+                                 @Param("nowmeIds") List<Long> nowmeIds);
 }

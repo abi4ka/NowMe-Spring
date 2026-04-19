@@ -9,5 +9,6 @@ public record NowmeDTO(
         Long likes,
         Long comments,
         String username,
-        String userAvatar
+        String userAvatar,
+        Boolean liked
 ) {}

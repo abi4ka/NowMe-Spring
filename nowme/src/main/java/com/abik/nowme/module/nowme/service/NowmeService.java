@@ -111,6 +111,13 @@ public class NowmeService {
         final Map<Long, Long> likeCountsFinal = likeCounts;
         final Map<Long, Long> commentCountsFinal = commentCounts;
 
+        List<Long> likedIds = nowmeIds.isEmpty()
+                ? Collections.emptyList()
+                : nowmeLikeRepository.findLikedNowmeIds(userId, nowmeIds);
+
+        Map<Long, Boolean> likedMap = likedIds.stream()
+                .collect(Collectors.toMap(id -> id, id -> true));
+
         List<NowmeDTO> content = pageContent.stream()
                 .map(nowme -> new NowmeDTO(
                         nowme.getId(),
@@ -119,7 +126,8 @@ public class NowmeService {
                         likeCountsFinal.getOrDefault(nowme.getId(), 0L),
                         commentCountsFinal.getOrDefault(nowme.getId(), 0L),
                         nowme.getUser().getUsername(),
-                        nowme.getUser().getAvatar()
+                        nowme.getUser().getAvatar(),
+                        likedMap.getOrDefault(nowme.getId(), false)
                 ))
                 .toList();
 
