@@ -11,5 +11,6 @@ public record NowmeDTO(
         Long comments,
         String username,
         String userAvatar,
+        Boolean favorite,
         Boolean liked
 ) {}

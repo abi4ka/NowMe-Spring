@@ -11,6 +11,8 @@ public interface NowmeRepository extends JpaRepository<Nowme, Long> {
 
     List<Nowme> findByUser_IdInOrderByCreationTimeDesc(List<Long> userIds);
 
+    List<Nowme> findByUser_IdAndActiveTrueOrderByCreationTimeDesc(Long userId);
+
     Optional<Nowme> findByIdAndActiveTrue(Long id);
 
     @Query("""

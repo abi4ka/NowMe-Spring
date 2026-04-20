@@ -118,20 +118,69 @@ public class NowmeService {
         Map<Long, Boolean> likedMap = likedIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> true));
 
-        List<NowmeDTO> content = pageContent.stream()
+        List<NowmeDTO> content = mapToDto(pageContent, likeCountsFinal, commentCountsFinal, likedMap);
+
+        return new PageImpl<>(content, pageable, availableNowmes.size());
+    }
+
+    public List<NowmeDTO> getProfileNowmes(String token, Long profileUserId) {
+        String cleanToken = jwtService.normalizeBearerToken(token);
+        Long viewerId = jwtService.extractUserId(cleanToken);
+
+        if (!userRepository.existsByIdAndActiveTrue(viewerId)) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
+        if (!userRepository.existsByIdAndActiveTrue(profileUserId)) {
+            throw new RuntimeException("PROFILE_USER_NOT_FOUND");
+        }
+
+        List<Nowme> profileNowmes = nowmeRepository.findByUser_IdAndActiveTrueOrderByCreationTimeDesc(profileUserId).stream()
+                .filter(nowme -> viewerId.equals(profileUserId) || nowmeImageAccessService.hasAccess(viewerId, nowme))
+                .toList();
+
+        List<Long> nowmeIds = profileNowmes.stream()
+                .map(Nowme::getId)
+                .toList();
+
+        Map<Long, Long> likeCounts = nowmeIds.isEmpty()
+                ? Collections.emptyMap()
+                : nowmeLikeRepository.countByNowmeIdIn(nowmeIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+        Map<Long, Long> commentCounts = nowmeIds.isEmpty()
+                ? Collections.emptyMap()
+                : commentRepository.countByNowmeIdIn(nowmeIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+        List<Long> likedIds = nowmeIds.isEmpty()
+                ? Collections.emptyList()
+                : nowmeLikeRepository.findLikedNowmeIds(viewerId, nowmeIds);
+
+        Map<Long, Boolean> likedMap = likedIds.stream()
+                .collect(Collectors.toMap(id -> id, id -> true));
+
+        return mapToDto(profileNowmes, likeCounts, commentCounts, likedMap);
+    }
+
+    private List<NowmeDTO> mapToDto(
+            List<Nowme> nowmes,
+            Map<Long, Long> likeCounts,
+            Map<Long, Long> commentCounts,
+            Map<Long, Boolean> likedMap
+    ) {
+        return nowmes.stream()
                 .map(nowme -> new NowmeDTO(
                         nowme.getId(),
                         nowme.getUser().getId(),
                         nowme.getDescription(),
                         nowme.getCreationTime(),
-                        likeCountsFinal.getOrDefault(nowme.getId(), 0L),
-                        commentCountsFinal.getOrDefault(nowme.getId(), 0L),
+                        likeCounts.getOrDefault(nowme.getId(), 0L),
+                        commentCounts.getOrDefault(nowme.getId(), 0L),
                         nowme.getUser().getUsername(),
                         nowme.getUser().getAvatar(),
+                        nowme.getFavorite(),
                         likedMap.getOrDefault(nowme.getId(), false)
                 ))
                 .toList();
-
-        return new PageImpl<>(content, pageable, availableNowmes.size());
     }
 }
