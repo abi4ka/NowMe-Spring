@@ -27,6 +27,7 @@ public class UserDto {
             long followersCount,
             long followingCount,
             long friends,
+            long streakDays,
             boolean me,
             boolean following,
             boolean friend

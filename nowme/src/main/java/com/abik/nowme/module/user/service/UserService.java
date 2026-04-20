@@ -1,5 +1,7 @@
 package com.abik.nowme.module.user.service;
 
+import com.abik.nowme.module.nowme.entity.Nowme;
+import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.dto.UserDto;
 import com.abik.nowme.module.user.entity.User;
@@ -8,12 +10,18 @@ import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
+    private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
 
     public UserDto.ProfileResponse getMyProfile(String token) {
@@ -54,10 +62,48 @@ public class UserService {
                 userFollowRepository.countFollowersWithoutFriends(userId),
                 userFollowRepository.countFollowingWithoutFriends(userId),
                 userFollowRepository.countFriends(userId),
+                calculateStreakDays(userId),
                 me,
                 following,
                 friend
         );
+    }
+
+    private long calculateStreakDays(Long userId) {
+        List<Nowme> nowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(List.of(userId));
+        if (nowmes.isEmpty()) {
+            return 0L;
+        }
+
+        Set<LocalDate> postDates = new TreeSet<>((first, second) -> second.compareTo(first));
+        for (Nowme nowme : nowmes) {
+            postDates.add(nowme.getCreationTime().toLocalDate());
+        }
+
+        LocalDate previousPostDate = postDates.iterator().next();
+        if (LocalDate.now().toEpochDay() - previousPostDate.toEpochDay() > 2L) {
+            return 0L;
+        }
+
+        long streakDays = 1L;
+        boolean skipFirst = true;
+        for (LocalDate postDate : postDates) {
+            if (skipFirst) {
+                skipFirst = false;
+                continue;
+            }
+
+            long gap = previousPostDate.toEpochDay() - postDate.toEpochDay();
+
+            if (gap > 2L) {
+                break;
+            }
+
+            streakDays++;
+            previousPostDate = postDate;
+        }
+
+        return streakDays;
     }
 
     private User getUserById(Long userId) {
