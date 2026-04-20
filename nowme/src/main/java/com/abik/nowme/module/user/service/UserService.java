@@ -43,8 +43,8 @@ public class UserService {
     private UserDto.ProfileResponse toProfileResponse(User user, Long viewerId) {
         Long userId = user.getId();
         boolean me = userId.equals(viewerId);
-        boolean following = !me && userFollowRepository.existsByFollowing_IdAndFollower_Id(userId, viewerId);
-        boolean friend = me || (following && userFollowRepository.existsByFollowing_IdAndFollower_Id(viewerId, userId));
+        boolean followingUser = !me && userFollowRepository.existsByFollowing_IdAndFollower_Id(userId, viewerId);
+        boolean friend = me || (followingUser && userFollowRepository.existsByFollowing_IdAndFollower_Id(viewerId, userId));
 
         return new UserDto.ProfileResponse(
                 user.getId(),
@@ -55,7 +55,7 @@ public class UserService {
                 userFollowRepository.countFollowingWithoutFriends(userId),
                 userFollowRepository.countFriends(userId),
                 me,
-                following,
+                followingUser,
                 friend
         );
     }

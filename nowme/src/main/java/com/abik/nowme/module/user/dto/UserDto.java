@@ -28,7 +28,7 @@ public class UserDto {
             long followingCount,
             long friends,
             boolean me,
-            boolean following,
+            boolean followingUser,
             boolean friend
     ) {}
 }
