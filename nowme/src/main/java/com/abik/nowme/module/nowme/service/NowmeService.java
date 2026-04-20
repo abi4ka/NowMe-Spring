@@ -121,6 +121,7 @@ public class NowmeService {
         List<NowmeDTO> content = pageContent.stream()
                 .map(nowme -> new NowmeDTO(
                         nowme.getId(),
+                        nowme.getUser().getId(),
                         nowme.getDescription(),
                         nowme.getCreationTime(),
                         likeCountsFinal.getOrDefault(nowme.getId(), 0L),
