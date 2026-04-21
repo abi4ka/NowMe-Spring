@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/nowme")
@@ -53,6 +55,14 @@ public class NowmeController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return nowmeService.getUserNowmesLast7Days(token, page, size);
+    }
+
+    @GetMapping("/users/{userId}")
+    public List<NowmeDTO> getProfileNowmes(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long userId
+    ) {
+        return nowmeService.getProfileNowmes(token, userId);
     }
 
     @PostMapping("/{id}/like")
