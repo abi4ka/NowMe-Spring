@@ -69,6 +69,22 @@ public class UserService {
         );
     }
 
+    public List<UserDto.SearchResponse> searchUsers(String token, String query) {
+
+        Long userId = extractUserId(token);
+        requireActiveUser(userId);
+
+        List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndActiveTrue(query);
+
+        return users.stream()
+                .map(user -> new UserDto.SearchResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getAvatar()
+                ))
+                .toList();
+    }
+
     private long calculateStreakDays(Long userId) {
         List<Nowme> nowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(List.of(userId));
         if (nowmes.isEmpty()) {

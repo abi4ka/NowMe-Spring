@@ -32,4 +32,10 @@ public class UserDto {
             boolean following,
             boolean friend
     ) {}
+
+    public record SearchResponse(
+            Long id,
+            String username,
+            String avatar
+    ) {}
 }
