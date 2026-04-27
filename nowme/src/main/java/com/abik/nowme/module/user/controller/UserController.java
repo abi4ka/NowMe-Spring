@@ -3,11 +3,9 @@ package com.abik.nowme.module.user.controller;
 import com.abik.nowme.module.user.dto.UserDto;
 import com.abik.nowme.module.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -35,5 +33,13 @@ public class UserController {
             @PathVariable String username
     ) {
         return userService.getProfileByUsername(token, username);
+    }
+
+    @GetMapping("/search")
+    public List<UserDto.SearchResponse> searchUsers(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String query
+    ) {
+        return userService.searchUsers(token, query);
     }
 }
