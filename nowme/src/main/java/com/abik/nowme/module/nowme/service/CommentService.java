@@ -11,6 +11,8 @@ import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -50,5 +52,25 @@ public class CommentService {
                 user.getUsername(),
                 comment.getContent()
         );
+    }
+    public List<CommentDto> getComments(Long nowmeId) {
+
+        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
+                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        if (!nowme.getUser().isActive()) {
+            throw new RuntimeException("NOWME_NOT_FOUND");
+        }
+
+        return commentRepository.findByNowmeIdOrderByIdDesc(nowmeId)
+                .stream()
+                .map(comment -> new CommentDto(
+                        comment.getId(),
+                        comment.getUser().getId(),
+                        comment.getUser().getAvatar(),
+                        comment.getUser().getUsername(),
+                        comment.getContent()
+                ))
+                .toList();
     }
 }

@@ -92,4 +92,12 @@ public class NowmeController {
         CommentDto response = commentService.createComment(token, id, request.content());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<CommentDto>> getComments(
+            @PathVariable Long id
+    ) {
+        List<CommentDto> comments = commentService.getComments(id);
+        return ResponseEntity.ok(comments);
+    }
 }
