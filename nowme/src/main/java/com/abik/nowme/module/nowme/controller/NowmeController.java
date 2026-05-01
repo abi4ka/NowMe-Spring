@@ -93,7 +93,7 @@ public class NowmeController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}/comments")
+    @GetMapping("/{id}/comment")
     public ResponseEntity<List<CommentDto>> getComments(
             @PathVariable Long id
     ) {
