@@ -9,6 +9,8 @@ import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,8 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
+    private final NowmeImageAccessService nowmeImageAccessService;
+
 
     public CommentDto createComment(String token, Long nowmeId, String content) {
         String cleanToken = jwtService.normalizeBearerToken(token);
@@ -53,7 +57,15 @@ public class CommentService {
                 comment.getContent()
         );
     }
-    public List<CommentDto> getComments(Long nowmeId) {
+
+    public Page<CommentDto> getComments(String token, Long nowmeId, int page, int size) {
+
+        String cleanToken = jwtService.normalizeBearerToken(token);
+        Long userId = jwtService.extractUserId(cleanToken);
+
+        if (!userRepository.existsByIdAndActiveTrue(userId)) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
 
         Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
@@ -62,15 +74,20 @@ public class CommentService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
-        return commentRepository.findByNowmeIdOrderByIdDesc(nowmeId)
-                .stream()
+        if (!nowmeImageAccessService.hasFeedAccess(userId, nowme)) {
+            throw new RuntimeException("ACCESS_DENIED");
+        }
+
+        PageRequest pageable = PageRequest.of(page, size);
+
+        return commentRepository
+                .findByNowmeIdAndActiveTrueOrderByCreatedAtDesc(nowmeId, pageable)
                 .map(comment -> new CommentDto(
                         comment.getId(),
                         comment.getUser().getId(),
                         comment.getUser().getAvatar(),
                         comment.getUser().getUsername(),
                         comment.getContent()
-                ))
-                .toList();
+                ));
     }
 }

@@ -94,10 +94,12 @@ public class NowmeController {
     }
 
     @GetMapping("/{id}/comment")
-    public ResponseEntity<List<CommentDto>> getComments(
-            @PathVariable Long id
+    public Page<CommentDto> getComments(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<CommentDto> comments = commentService.getComments(id);
-        return ResponseEntity.ok(comments);
+        return commentService.getComments(token, id, page, size);
     }
 }
