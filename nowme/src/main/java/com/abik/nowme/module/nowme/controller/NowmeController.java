@@ -92,4 +92,14 @@ public class NowmeController {
         CommentDto response = commentService.createComment(token, id, request.content());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}/comment")
+    public Page<CommentDto> getComments(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return commentService.getComments(token, id, page, size);
+    }
 }
