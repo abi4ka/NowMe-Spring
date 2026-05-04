@@ -38,4 +38,6 @@ public class UserDto {
             String username,
             String avatar
     ) {}
+
+    public record UpdateAvatarRequest(String avatar) {}
 }

@@ -137,4 +137,14 @@ public class UserService {
         String cleanToken = jwtService.normalizeBearerToken(token);
         return jwtService.extractUserId(cleanToken);
     }
+
+    public void updateAvatar(String token, String avatar) {
+        Long userId = jwtService.extractUserId(jwtService.normalizeBearerToken(token));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        user.setAvatar(avatar);
+        userRepository.save(user);
+    }
 }

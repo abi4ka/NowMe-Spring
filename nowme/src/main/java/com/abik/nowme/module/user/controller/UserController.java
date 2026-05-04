@@ -3,6 +3,7 @@ package com.abik.nowme.module.user.controller;
 import com.abik.nowme.module.user.dto.UserDto;
 import com.abik.nowme.module.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,5 +42,14 @@ public class UserController {
             @RequestParam String query
     ) {
         return userService.searchUsers(token, query);
+    }
+
+    @PutMapping("/avatar")
+    public ResponseEntity<Void> updateAvatar(
+            @RequestHeader("Authorization") String token,
+            @RequestBody UserDto.UpdateAvatarRequest request
+    ) {
+        userService.updateAvatar(token, request.avatar());
+        return ResponseEntity.ok().build();
     }
 }
