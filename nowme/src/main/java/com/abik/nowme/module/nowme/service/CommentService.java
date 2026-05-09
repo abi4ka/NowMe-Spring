@@ -1,6 +1,6 @@
 package com.abik.nowme.module.nowme.service;
 
-import com.abik.nowme.module.nowme.dto.CommentDto;
+import com.abik.nowme.module.nowme.dto.CommentResponse;
 import com.abik.nowme.module.nowme.entity.Comment;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.entity.Nowme;
@@ -13,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -26,7 +24,7 @@ public class CommentService {
     private final NowmeImageAccessService nowmeImageAccessService;
 
 
-    public CommentDto createComment(String token, Long nowmeId, String content) {
+    public CommentResponse createComment(String token, Long nowmeId, String content) {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
@@ -53,7 +51,7 @@ public class CommentService {
 
         nowmeRepository.save(nowme);
 
-        return new CommentDto(
+        return new CommentResponse(
                 comment.getId(),
                 user.getId(),
                 user.getAvatar(),
@@ -62,7 +60,7 @@ public class CommentService {
         );
     }
 
-    public Page<CommentDto> getComments(String token, Long nowmeId, int page, int size) {
+    public Page<CommentResponse> getComments(String token, Long nowmeId, int page, int size) {
 
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
@@ -86,7 +84,7 @@ public class CommentService {
 
         return commentRepository
                 .findByNowmeIdAndActiveTrueOrderByCreatedAtDesc(nowmeId, pageable)
-                .map(comment -> new CommentDto(
+                .map(comment -> new CommentResponse(
                         comment.getId(),
                         comment.getUser().getId(),
                         comment.getUser().getAvatar(),

@@ -1,6 +1,6 @@
 package com.abik.nowme.module.nowme.service;
 
-import com.abik.nowme.module.nowme.dto.NowmeDTO;
+import com.abik.nowme.module.nowme.dto.NowmeResponse;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
@@ -67,7 +67,7 @@ public class NowmeService {
         return nowme.getId();
     }
 
-    public Page<NowmeDTO> getUserNowmesLast7Days(String token, int page, int size) {
+    public Page<NowmeResponse> getUserNowmesLast7Days(String token, int page, int size) {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
@@ -118,12 +118,12 @@ public class NowmeService {
         Map<Long, Boolean> likedMap = likedIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> true));
 
-        List<NowmeDTO> content = mapToDto(pageContent, likeCountsFinal, commentCountsFinal, likedMap);
+        List<NowmeResponse> content = mapToDto(pageContent, likeCountsFinal, commentCountsFinal, likedMap);
 
         return new PageImpl<>(content, pageable, availableNowmes.size());
     }
 
-    public List<NowmeDTO> getProfileNowmes(String token, Long profileUserId) {
+    public List<NowmeResponse> getProfileNowmes(String token, Long profileUserId) {
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long viewerId = jwtService.extractUserId(cleanToken);
 
@@ -162,14 +162,14 @@ public class NowmeService {
         return mapToDto(profileNowmes, likeCounts, commentCounts, likedMap);
     }
 
-    private List<NowmeDTO> mapToDto(
+    private List<NowmeResponse> mapToDto(
             List<Nowme> nowmes,
             Map<Long, Long> likeCounts,
             Map<Long, Long> commentCounts,
             Map<Long, Boolean> likedMap
     ) {
         return nowmes.stream()
-                .map(nowme -> new NowmeDTO(
+                .map(nowme -> new NowmeResponse(
                         nowme.getId(),
                         nowme.getUser().getId(),
                         nowme.getDescription(),

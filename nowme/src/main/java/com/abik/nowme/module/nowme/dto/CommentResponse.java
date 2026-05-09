@@ -1,6 +1,6 @@
 package com.abik.nowme.module.nowme.dto;
 
-public record CommentDto(
+public record CommentResponse(
         Long id,
         Long userId,
         String userAvatar,

@@ -1,7 +1,6 @@
 package com.abik.nowme.module.nowme.repository;
 
 import com.abik.nowme.module.nowme.entity.Comment;
-import com.abik.nowme.module.nowme.entity.Nowme;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -3,7 +3,8 @@ package com.abik.nowme.module.user.service;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
-import com.abik.nowme.module.user.dto.UserDto;
+import com.abik.nowme.module.user.dto.UserProfileResponse;
+import com.abik.nowme.module.user.dto.UserSearchResponse;
 import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserFollowRepository;
 import com.abik.nowme.module.user.repository.UserRepository;
@@ -24,14 +25,14 @@ public class UserService {
     private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
 
-    public UserDto.ProfileResponse getMyProfile(String token) {
+    public UserProfileResponse getMyProfile(String token) {
         Long userId = extractUserId(token);
         User user = getUserById(userId);
 
         return toProfileResponse(user, userId);
     }
 
-    public UserDto.ProfileResponse getProfileById(String token, Long userId) {
+    public UserProfileResponse getProfileById(String token, Long userId) {
         Long viewerId = extractUserId(token);
         requireActiveUser(viewerId);
         User user = getUserById(userId);
@@ -39,7 +40,7 @@ public class UserService {
         return toProfileResponse(user, viewerId);
     }
 
-    public UserDto.ProfileResponse getProfileByUsername(String token, String username) {
+    public UserProfileResponse getProfileByUsername(String token, String username) {
         Long viewerId = extractUserId(token);
         requireActiveUser(viewerId);
         User user = userRepository.findByUsernameAndActiveTrue(username)
@@ -48,13 +49,13 @@ public class UserService {
         return toProfileResponse(user, viewerId);
     }
 
-    private UserDto.ProfileResponse toProfileResponse(User user, Long viewerId) {
+    private UserProfileResponse toProfileResponse(User user, Long viewerId) {
         Long userId = user.getId();
         boolean me = userId.equals(viewerId);
         boolean following = !me && userFollowRepository.existsByFollowing_IdAndFollower_Id(userId, viewerId);
         boolean friend = me || (following && userFollowRepository.existsByFollowing_IdAndFollower_Id(viewerId, userId));
 
-        return new UserDto.ProfileResponse(
+        return new UserProfileResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getAvatar(),
@@ -69,7 +70,7 @@ public class UserService {
         );
     }
 
-    public List<UserDto.SearchResponse> searchUsers(String token, String query) {
+    public List<UserSearchResponse> searchUsers(String token, String query) {
 
         Long userId = extractUserId(token);
         requireActiveUser(userId);
@@ -77,7 +78,7 @@ public class UserService {
         List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndActiveTrue(query);
 
         return users.stream()
-                .map(user -> new UserDto.SearchResponse(
+                .map(user -> new UserSearchResponse(
                         user.getId(),
                         user.getUsername(),
                         user.getAvatar()

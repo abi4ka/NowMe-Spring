@@ -1,6 +1,8 @@
 package com.abik.nowme.module.shared.service;
 
-import com.abik.nowme.module.user.dto.UserDto;
+import com.abik.nowme.module.user.dto.AuthResponse;
+import com.abik.nowme.module.user.dto.LoginRequest;
+import com.abik.nowme.module.user.dto.RegisterRequest;
 import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserRepository;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -17,7 +19,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
 
-    public UserDto.AuthResponse register(UserDto.RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new RuntimeException("Username already exists");
@@ -31,7 +33,7 @@ public class AuthService {
         return generateTokens(user.getId());
     }
 
-    public UserDto.AuthResponse login(UserDto.LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByUsernameAndActiveTrue(request.username())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -43,7 +45,7 @@ public class AuthService {
         return generateTokens(user.getId());
     }
 
-    public UserDto.AuthResponse refresh(String accessToken, String refreshToken) {
+    public AuthResponse refresh(String accessToken, String refreshToken) {
 
         Long userIdFromRefresh = jwtService.extractUserId(refreshToken);
         Long userIdFromAccess;
@@ -75,7 +77,7 @@ public class AuthService {
         return generateTokens(userIdFromRefresh);
     }
 
-    private UserDto.AuthResponse generateTokens(Long userId) {
+    private AuthResponse generateTokens(Long userId) {
 
         String access = jwtService.generateAccessToken(userId);
         String refresh = jwtService.generateRefreshToken(userId);
@@ -84,6 +86,6 @@ public class AuthService {
 
         refreshTokenService.save(userId, refresh, expiresAt);
 
-        return new UserDto.AuthResponse(access, refresh);
+        return new AuthResponse(access, refresh);
     }
 }
