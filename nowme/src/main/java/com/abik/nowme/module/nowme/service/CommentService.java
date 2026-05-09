@@ -40,6 +40,10 @@ public class CommentService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
+        if (!nowmeImageAccessService.hasFeedAccess(userId, nowme)) {
+            throw new RuntimeException("ACCESS_DENIED");
+        }
+
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setNowme(nowme);
