@@ -33,7 +33,7 @@ public class LikeService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
-        if (!nowmeAccessService.hasFeedAccess(userId, nowme)) {
+        if (!nowmeAccessService.hasAccess(userId, nowme)) {
             throw new RuntimeException("ACCESS_DENIED");
         }
 
