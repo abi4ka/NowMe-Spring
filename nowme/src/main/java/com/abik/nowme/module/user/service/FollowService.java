@@ -27,11 +27,11 @@ public class FollowService {
                 .orElseThrow(() -> new RuntimeException("USER_TO_FOLLOW_NOT_FOUND"));
 
         if (follower.getId().equals(user.getId())) {
-            throw new RuntimeException("You can not follow yourself");
+            throw new RuntimeException("CANNOT_FOLLOW_YOURSELF");
         }
 
         if (followRepository.existsByFollowing_IdAndFollower_Id(user.getId(), follower.getId())) {
-            throw new RuntimeException("You are already following");
+            throw new RuntimeException("ALREADY_FOLLOWING");
         }
 
         Follow follow = new Follow();

@@ -22,7 +22,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.findByUsername(request.username()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("USERNAME_ALREADY_EXISTS");
         }
 
         User user = new User();
@@ -36,10 +36,10 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByUsernameAndActiveTrue(request.username())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         if (!user.getPassword().equals(request.password())) {
-            throw new RuntimeException("Wrong password");
+            throw new RuntimeException("WRONG_PASSWORD");
         }
 
         return generateTokens(user.getId());
@@ -57,15 +57,15 @@ public class AuthService {
         }
 
         if (!userIdFromRefresh.equals(userIdFromAccess)) {
-            throw new RuntimeException("Token mismatch");
+            throw new RuntimeException("TOKEN_MISMATCH");
         }
 
         if (!"refresh".equals(jwtService.getTokenType(refreshToken))) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new RuntimeException("INVALID_REFRESH_TOKEN");
         }
 
         if (!refreshTokenService.isValid(userIdFromRefresh, refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new RuntimeException("INVALID_REFRESH_TOKEN");
         }
 
         if (!userRepository.existsByIdAndActiveTrue(userIdFromRefresh)) {
