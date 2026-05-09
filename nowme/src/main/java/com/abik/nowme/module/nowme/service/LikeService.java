@@ -51,11 +51,7 @@ public class LikeService {
 
         likeRepository.save(like);
 
-        Long likesCount = likeRepository.countByNowmeId(nowmeId);
-
-        nowmeRepository.save(nowme);
-
-        return likesCount;
+        return likeRepository.countByNowmeId(nowmeId);
     }
 
     public Long unlike(String token, Long nowmeId) {
@@ -71,15 +67,6 @@ public class LikeService {
 
         likeRepository.delete(like);
         Long likesCount = likeRepository.countByNowmeId(nowmeId);
-
-        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
-                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
-
-        if (!nowme.getUser().isActive()) {
-            throw new RuntimeException("NOWME_NOT_FOUND");
-        }
-
-        nowmeRepository.save(nowme);
 
         return likesCount;
     }

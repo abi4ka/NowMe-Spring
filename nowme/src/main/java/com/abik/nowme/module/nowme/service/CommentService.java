@@ -49,8 +49,6 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        nowmeRepository.save(nowme);
-
         return new CommentResponse(
                 comment.getId(),
                 user.getId(),
@@ -61,7 +59,6 @@ public class CommentService {
     }
 
     public Page<CommentResponse> getComments(String token, Long nowmeId, int page, int size) {
-
         String cleanToken = jwtService.normalizeBearerToken(token);
         Long userId = jwtService.extractUserId(cleanToken);
 
