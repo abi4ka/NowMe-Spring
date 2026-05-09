@@ -73,4 +73,8 @@ public class JwtService {
         }
         return token.startsWith("Bearer ") ? token.substring(7) : token;
     }
+
+    public Long getUserIdFromToken(String token) {
+        return extractUserId(normalizeBearerToken(token));
+    }
 }

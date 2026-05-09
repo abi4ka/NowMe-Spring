@@ -26,27 +26,27 @@ public class UserService {
     private final JwtService jwtService;
 
     public UserProfileResponse getMyProfile(String token) {
-        Long userId = extractUserId(token);
+        Long userId = jwtService.getUserIdFromToken(token);
         User user = getUserById(userId);
 
         return toProfileResponse(user, userId);
     }
 
-    public UserProfileResponse getProfileById(String token, Long userId) {
-        Long viewerId = extractUserId(token);
-        requireActiveUser(viewerId);
-        User user = getUserById(userId);
+    public UserProfileResponse getProfileById(String token, Long profileId) {
+        Long userId = jwtService.getUserIdFromToken(token);
+        requireActiveUser(userId);
+        User user = getUserById(profileId);
 
-        return toProfileResponse(user, viewerId);
+        return toProfileResponse(user, userId);
     }
 
     public UserProfileResponse getProfileByUsername(String token, String username) {
-        Long viewerId = extractUserId(token);
-        requireActiveUser(viewerId);
+        Long userId = jwtService.getUserIdFromToken(token);
+        requireActiveUser(userId);
         User user = userRepository.findByUsernameAndActiveTrue(username)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        return toProfileResponse(user, viewerId);
+        return toProfileResponse(user, userId);
     }
 
     private UserProfileResponse toProfileResponse(User user, Long viewerId) {
@@ -71,8 +71,7 @@ public class UserService {
     }
 
     public List<UserSearchResponse> searchUsers(String token, String query) {
-
-        Long userId = extractUserId(token);
+        Long userId = jwtService.getUserIdFromToken(token);
         requireActiveUser(userId);
 
         List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndActiveTrue(query);
@@ -132,11 +131,6 @@ public class UserService {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
-    }
-
-    private Long extractUserId(String token) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        return jwtService.extractUserId(cleanToken);
     }
 
     public void updateAvatar(String token, String avatar) {

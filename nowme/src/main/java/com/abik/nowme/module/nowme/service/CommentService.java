@@ -25,8 +25,7 @@ public class CommentService {
 
 
     public CommentResponse createComment(String token, Long nowmeId, String content) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -59,8 +58,7 @@ public class CommentService {
     }
 
     public Page<CommentResponse> getComments(String token, Long nowmeId, int page, int size) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");

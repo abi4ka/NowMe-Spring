@@ -26,8 +26,7 @@ public class ImageService {
     private final UserRepository userRepository;
 
     public Resource getNowmeImageById(String token, Long id) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");

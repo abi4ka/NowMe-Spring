@@ -21,8 +21,7 @@ public class LikeService {
     private final NowmeAccessService nowmeAccessService;
 
     public Long like(String token, Long nowmeId) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -55,8 +54,7 @@ public class LikeService {
     }
 
     public Long unlike(String token, Long nowmeId) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
@@ -66,8 +64,7 @@ public class LikeService {
                 .orElseThrow(() -> new RuntimeException("LIKE_NOT_FOUND"));
 
         likeRepository.delete(like);
-        Long likesCount = likeRepository.countByNowmeId(nowmeId);
 
-        return likesCount;
+        return likeRepository.countByNowmeId(nowmeId);
     }
 }

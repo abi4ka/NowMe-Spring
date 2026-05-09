@@ -41,8 +41,7 @@ public class NowmeService {
     private final NowmeAccessService nowmeAccessService;
 
     public Long createNowme(String token, MultipartFile image, String description) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -68,8 +67,7 @@ public class NowmeService {
     }
 
     public Page<NowmeResponse> getUserNowmesLast7Days(String token, int page, int size) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
@@ -108,9 +106,6 @@ public class NowmeService {
                 : commentRepository.countByNowmeIdIn(nowmeIds).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
 
-        final Map<Long, Long> likeCountsFinal = likeCounts;
-        final Map<Long, Long> commentCountsFinal = commentCounts;
-
         List<Long> likedIds = nowmeIds.isEmpty()
                 ? Collections.emptyList()
                 : nowmeLikeRepository.findLikedNowmeIds(userId, nowmeIds);
@@ -118,16 +113,15 @@ public class NowmeService {
         Map<Long, Boolean> likedMap = likedIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> true));
 
-        List<NowmeResponse> content = mapToDto(pageContent, likeCountsFinal, commentCountsFinal, likedMap);
+        List<NowmeResponse> content = mapToDto(pageContent, likeCounts, commentCounts, likedMap);
 
         return new PageImpl<>(content, pageable, availableNowmes.size());
     }
 
     public List<NowmeResponse> getProfileNowmes(String token, Long profileUserId) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long viewerId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
-        if (!userRepository.existsByIdAndActiveTrue(viewerId)) {
+        if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
         if (!userRepository.existsByIdAndActiveTrue(profileUserId)) {
@@ -135,7 +129,7 @@ public class NowmeService {
         }
 
         List<Nowme> profileNowmes = nowmeRepository.findByUser_IdAndActiveTrueOrderByCreationTimeDesc(profileUserId).stream()
-                .filter(nowme -> viewerId.equals(profileUserId) || nowmeAccessService.hasAccess(viewerId, nowme))
+                .filter(nowme -> userId.equals(profileUserId) || nowmeAccessService.hasAccess(userId, nowme))
                 .toList();
 
         List<Long> nowmeIds = profileNowmes.stream()
@@ -154,7 +148,7 @@ public class NowmeService {
 
         List<Long> likedIds = nowmeIds.isEmpty()
                 ? Collections.emptyList()
-                : nowmeLikeRepository.findLikedNowmeIds(viewerId, nowmeIds);
+                : nowmeLikeRepository.findLikedNowmeIds(userId, nowmeIds);
 
         Map<Long, Boolean> likedMap = likedIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> true));
