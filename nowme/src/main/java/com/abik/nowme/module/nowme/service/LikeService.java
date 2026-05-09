@@ -18,7 +18,7 @@ public class LikeService {
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
     private final NowmeLikeRepository likeRepository;
-    private final NowmeImageAccessService nowmeImageAccessService;
+    private final NowmeAccessService nowmeAccessService;
 
     public Long like(String token, Long nowmeId) {
         String cleanToken = jwtService.normalizeBearerToken(token);
@@ -34,7 +34,7 @@ public class LikeService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
-        if (!nowmeImageAccessService.hasFeedAccess(userId, nowme)) {
+        if (!nowmeAccessService.hasFeedAccess(userId, nowme)) {
             throw new RuntimeException("ACCESS_DENIED");
         }
 

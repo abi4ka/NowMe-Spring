@@ -21,7 +21,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
-    private final NowmeImageAccessService nowmeImageAccessService;
+    private final NowmeAccessService nowmeAccessService;
 
 
     public CommentResponse createComment(String token, Long nowmeId, String content) {
@@ -38,7 +38,7 @@ public class CommentService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
-        if (!nowmeImageAccessService.hasFeedAccess(userId, nowme)) {
+        if (!nowmeAccessService.hasFeedAccess(userId, nowme)) {
             throw new RuntimeException("ACCESS_DENIED");
         }
 
@@ -76,7 +76,7 @@ public class CommentService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
-        if (!nowmeImageAccessService.hasFeedAccess(userId, nowme)) {
+        if (!nowmeAccessService.hasFeedAccess(userId, nowme)) {
             throw new RuntimeException("ACCESS_DENIED");
         }
 

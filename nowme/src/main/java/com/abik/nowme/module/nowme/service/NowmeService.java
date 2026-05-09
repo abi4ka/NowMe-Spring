@@ -38,7 +38,7 @@ public class NowmeService {
     private final JwtService jwtService;
     private final NowmeLikeRepository nowmeLikeRepository;
     private final CommentRepository commentRepository;
-    private final NowmeImageAccessService nowmeImageAccessService;
+    private final NowmeAccessService nowmeAccessService;
 
     public Long createNowme(String token, MultipartFile image, String description) {
         String cleanToken = jwtService.normalizeBearerToken(token);
@@ -83,7 +83,7 @@ public class NowmeService {
                 .toList();
 
         List<Nowme> availableNowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(authorIds).stream()
-                .filter(nowme -> nowmeImageAccessService.hasFeedAccess(userId, nowme))
+                .filter(nowme -> nowmeAccessService.hasFeedAccess(userId, nowme))
                 .toList();
 
         Pageable pageable = PageRequest.of(page, size);
@@ -135,7 +135,7 @@ public class NowmeService {
         }
 
         List<Nowme> profileNowmes = nowmeRepository.findByUser_IdAndActiveTrueOrderByCreationTimeDesc(profileUserId).stream()
-                .filter(nowme -> viewerId.equals(profileUserId) || nowmeImageAccessService.hasAccess(viewerId, nowme))
+                .filter(nowme -> viewerId.equals(profileUserId) || nowmeAccessService.hasAccess(viewerId, nowme))
                 .toList();
 
         List<Long> nowmeIds = profileNowmes.stream()

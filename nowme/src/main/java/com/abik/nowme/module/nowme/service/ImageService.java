@@ -22,7 +22,7 @@ public class ImageService {
     private final Path uploadDir = Paths.get("uploads");
     private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
-    private final NowmeImageAccessService nowmeImageAccessService;
+    private final NowmeAccessService nowmeAccessService;
     private final UserRepository userRepository;
 
     public Resource getNowmeImageById(String token, Long id) {
@@ -36,7 +36,7 @@ public class ImageService {
         Nowme nowme = nowmeRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
 
-        if (!nowmeImageAccessService.hasAccess(userId, nowme)) {
+        if (!nowmeAccessService.hasAccess(userId, nowme)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "IMAGE_ACCESS_DENIED");
         }
 
