@@ -4,6 +4,7 @@ import com.abik.nowme.module.user.dto.UpdateAvatarRequest;
 import com.abik.nowme.module.user.dto.UserProfileResponse;
 import com.abik.nowme.module.user.dto.UserSearchResponse;
 import com.abik.nowme.module.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +50,7 @@ public class UserController {
     @PutMapping("/avatar")
     public ResponseEntity<Void> updateAvatar(
             @RequestHeader("Authorization") String token,
-            @RequestBody UpdateAvatarRequest request
+            @Valid @RequestBody UpdateAvatarRequest request
     ) {
         userService.updateAvatar(token, request.avatar());
         return ResponseEntity.ok().build();

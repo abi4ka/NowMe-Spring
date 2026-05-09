@@ -7,6 +7,7 @@ import com.abik.nowme.module.nowme.service.CommentService;
 import com.abik.nowme.module.nowme.service.ImageService;
 import com.abik.nowme.module.nowme.service.LikeService;
 import com.abik.nowme.module.nowme.service.NowmeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -86,7 +87,7 @@ public class NowmeController {
     public ResponseEntity<CommentResponse> comment(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody CommentRequest request) {
+            @Valid @RequestBody CommentRequest request) {
         CommentResponse response = commentService.createComment(token, id, request.content());
 
         return ResponseEntity.ok(response);

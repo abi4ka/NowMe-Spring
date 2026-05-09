@@ -1,3 +1,14 @@
 package com.abik.nowme.module.user.dto;
 
-public record RegisterRequest(String username, String password) {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record RegisterRequest(
+        @NotBlank
+        @Size(max = 20)
+        String username,
+
+        @NotBlank
+        @Size(max = 24)
+        String password
+) {}

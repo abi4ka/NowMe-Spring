@@ -2,12 +2,17 @@ package com.abik.nowme.module.shared.controller;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -21,6 +26,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JWTVerificationException.class)
     public ResponseEntity<Map<String, String>> handleInvalidToken(JWTVerificationException e) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN");
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        List<String> details = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(this::formatFieldError)
+                .toList();
+
+        return buildValidationErrorResponse(details);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException e) {
+        List<String> details = e.getConstraintViolations()
+                .stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .toList();
+
+        return buildValidationErrorResponse(details);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -47,6 +73,18 @@ public class GlobalExceptionHandler {
     private ResponseEntity<Map<String, String>> buildErrorResponse(org.springframework.http.HttpStatusCode status, String errorCode) {
         return ResponseEntity.status(status)
                 .body(Map.of("error", errorCode));
+    }
+
+    private ResponseEntity<Map<String, Object>> buildValidationErrorResponse(List<String> details) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", "INVALID_REQUEST");
+        body.put("details", details);
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    private String formatFieldError(FieldError fieldError) {
+        return fieldError.getField() + ": " + fieldError.getDefaultMessage();
     }
 
     private ErrorDescriptor mapRuntimeException(RuntimeException e) {
