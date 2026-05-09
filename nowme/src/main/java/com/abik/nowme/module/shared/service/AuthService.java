@@ -80,7 +80,7 @@ public class AuthService {
         String access = jwtService.generateAccessToken(userId);
         String refresh = jwtService.generateRefreshToken(userId);
 
-        Date expiresAt = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L);
+        Date expiresAt = jwtService.getRefreshTokenExpiresAt();
 
         refreshTokenService.save(userId, refresh, expiresAt);
 
