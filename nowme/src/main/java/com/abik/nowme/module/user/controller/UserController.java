@@ -1,7 +1,10 @@
 package com.abik.nowme.module.user.controller;
 
-import com.abik.nowme.module.user.dto.UserDto;
+import com.abik.nowme.module.user.dto.UpdateAvatarRequest;
+import com.abik.nowme.module.user.dto.UserProfileResponse;
+import com.abik.nowme.module.user.dto.UserSearchResponse;
 import com.abik.nowme.module.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +19,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public UserDto.ProfileResponse getMyProfile(@RequestHeader("Authorization") String token) {
+    public UserProfileResponse getMyProfile(@RequestHeader("Authorization") String token) {
         return userService.getMyProfile(token);
     }
 
     @GetMapping("/{id}")
-    public UserDto.ProfileResponse getProfileById(
+    public UserProfileResponse getProfileById(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
     ) {
@@ -29,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping("/username/{username}")
-    public UserDto.ProfileResponse getProfileByUsername(
+    public UserProfileResponse getProfileByUsername(
             @RequestHeader("Authorization") String token,
             @PathVariable String username
     ) {
@@ -37,7 +40,7 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public List<UserDto.SearchResponse> searchUsers(
+    public List<UserSearchResponse> searchUsers(
             @RequestHeader("Authorization") String token,
             @RequestParam String query
     ) {
@@ -47,7 +50,7 @@ public class UserController {
     @PutMapping("/avatar")
     public ResponseEntity<Void> updateAvatar(
             @RequestHeader("Authorization") String token,
-            @RequestBody UserDto.UpdateAvatarRequest request
+            @Valid @RequestBody UpdateAvatarRequest request
     ) {
         userService.updateAvatar(token, request.avatar());
         return ResponseEntity.ok().build();

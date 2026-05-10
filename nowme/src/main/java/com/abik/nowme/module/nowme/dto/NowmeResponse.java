@@ -2,7 +2,7 @@ package com.abik.nowme.module.nowme.dto;
 
 import java.time.LocalDateTime;
 
-public record NowmeDTO(
+public record NowmeResponse(
         Long id,
         Long userId,
         String description,

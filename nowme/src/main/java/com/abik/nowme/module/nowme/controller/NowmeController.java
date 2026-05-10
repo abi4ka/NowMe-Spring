@@ -1,12 +1,13 @@
 package com.abik.nowme.module.nowme.controller;
 
-import com.abik.nowme.module.nowme.dto.CommentDto;
+import com.abik.nowme.module.nowme.dto.CommentResponse;
 import com.abik.nowme.module.nowme.dto.CommentRequest;
-import com.abik.nowme.module.nowme.dto.NowmeDTO;
+import com.abik.nowme.module.nowme.dto.NowmeResponse;
 import com.abik.nowme.module.nowme.service.CommentService;
 import com.abik.nowme.module.nowme.service.ImageService;
 import com.abik.nowme.module.nowme.service.LikeService;
 import com.abik.nowme.module.nowme.service.NowmeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -39,8 +40,7 @@ public class NowmeController {
     @GetMapping("/{id}/image")
     public ResponseEntity<Resource> getImage(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id
-    ) {
+            @PathVariable Long id) {
         Resource resource = imageService.getNowmeImageById(token, id);
 
         return ResponseEntity.ok()
@@ -49,57 +49,57 @@ public class NowmeController {
     }
 
     @GetMapping
-    public Page<NowmeDTO> getNowmes(
+    public Page<NowmeResponse> getNowmes(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
+
         return nowmeService.getUserNowmesLast7Days(token, page, size);
     }
 
     @GetMapping("/users/{userId}")
-    public List<NowmeDTO> getProfileNowmes(
+    public List<NowmeResponse> getProfileNowmes(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long userId
-    ) {
+            @PathVariable Long userId) {
+
         return nowmeService.getProfileNowmes(token, userId);
     }
 
     @PostMapping("/{id}/like")
     public ResponseEntity<Long> like(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id
-    ) {
+            @PathVariable Long id) {
         Long likes = likeService.like(token, id);
+
         return ResponseEntity.ok(likes);
     }
 
     @DeleteMapping("/{id}/like")
     public ResponseEntity<Long> unlike(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id
-    ) {
+            @PathVariable Long id) {
         Long likes = likeService.unlike(token, id);
+
         return ResponseEntity.ok(likes);
     }
 
     @PostMapping("/{id}/comment")
-    public ResponseEntity<CommentDto> comment(
+    public ResponseEntity<CommentResponse> comment(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody CommentRequest request
-    ) {
-        CommentDto response = commentService.createComment(token, id, request.content());
+            @Valid @RequestBody CommentRequest request) {
+        CommentResponse response = commentService.createComment(token, id, request.content());
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/comment")
-    public Page<CommentDto> getComments(
+    public Page<CommentResponse> getComments(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
+
         return commentService.getComments(token, id, page, size);
     }
 }

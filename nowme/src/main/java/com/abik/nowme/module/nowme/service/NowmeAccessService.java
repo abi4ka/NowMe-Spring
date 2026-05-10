@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class NowmeImageAccessService {
+public class NowmeAccessService {
 
     private final NowmeRepository nowmeRepository;
     private final FriendshipService friendshipService;

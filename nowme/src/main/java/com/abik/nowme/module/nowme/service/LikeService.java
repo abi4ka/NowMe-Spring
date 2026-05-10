@@ -18,10 +18,10 @@ public class LikeService {
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
     private final NowmeLikeRepository likeRepository;
+    private final NowmeAccessService nowmeAccessService;
 
     public Long like(String token, Long nowmeId) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -31,6 +31,10 @@ public class LikeService {
 
         if (!nowme.getUser().isActive()) {
             throw new RuntimeException("NOWME_NOT_FOUND");
+        }
+
+        if (!nowmeAccessService.hasAccess(userId, nowme)) {
+            throw new RuntimeException("ACCESS_DENIED");
         }
 
         var existingLike = likeRepository.findByUserIdAndNowmeId(userId, nowmeId);
@@ -46,16 +50,11 @@ public class LikeService {
 
         likeRepository.save(like);
 
-        Long likesCount = likeRepository.countByNowmeId(nowmeId);
-
-        nowmeRepository.save(nowme);
-
-        return likesCount;
+        return likeRepository.countByNowmeId(nowmeId);
     }
 
     public Long unlike(String token, Long nowmeId) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+        Long userId = jwtService.getUserIdFromToken(token);
 
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
@@ -65,17 +64,7 @@ public class LikeService {
                 .orElseThrow(() -> new RuntimeException("LIKE_NOT_FOUND"));
 
         likeRepository.delete(like);
-        Long likesCount = likeRepository.countByNowmeId(nowmeId);
 
-        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
-                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
-
-        if (!nowme.getUser().isActive()) {
-            throw new RuntimeException("NOWME_NOT_FOUND");
-        }
-
-        nowmeRepository.save(nowme);
-
-        return likesCount;
+        return likeRepository.countByNowmeId(nowmeId);
     }
 }

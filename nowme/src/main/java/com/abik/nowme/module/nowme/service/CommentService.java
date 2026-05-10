@@ -1,6 +1,6 @@
 package com.abik.nowme.module.nowme.service;
 
-import com.abik.nowme.module.nowme.dto.CommentDto;
+import com.abik.nowme.module.nowme.dto.CommentResponse;
 import com.abik.nowme.module.nowme.entity.Comment;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.entity.Nowme;
@@ -13,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -23,12 +21,11 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
     private final JwtService jwtService;
-    private final NowmeImageAccessService nowmeImageAccessService;
+    private final NowmeAccessService nowmeAccessService;
 
 
-    public CommentDto createComment(String token, Long nowmeId, String content) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+    public CommentResponse createComment(String token, Long nowmeId, String content) {
+        Long userId = jwtService.getUserIdFromToken(token);
 
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -40,6 +37,10 @@ public class CommentService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
+        if (!nowmeAccessService.hasAccess(userId, nowme)) {
+            throw new RuntimeException("ACCESS_DENIED");
+        }
+
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setNowme(nowme);
@@ -47,9 +48,7 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        nowmeRepository.save(nowme);
-
-        return new CommentDto(
+        return new CommentResponse(
                 comment.getId(),
                 user.getId(),
                 user.getAvatar(),
@@ -58,10 +57,8 @@ public class CommentService {
         );
     }
 
-    public Page<CommentDto> getComments(String token, Long nowmeId, int page, int size) {
-
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long userId = jwtService.extractUserId(cleanToken);
+    public Page<CommentResponse> getComments(String token, Long nowmeId, int page, int size) {
+        Long userId = jwtService.getUserIdFromToken(token);
 
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
@@ -74,7 +71,7 @@ public class CommentService {
             throw new RuntimeException("NOWME_NOT_FOUND");
         }
 
-        if (!nowmeImageAccessService.hasFeedAccess(userId, nowme)) {
+        if (!nowmeAccessService.hasAccess(userId, nowme)) {
             throw new RuntimeException("ACCESS_DENIED");
         }
 
@@ -82,7 +79,7 @@ public class CommentService {
 
         return commentRepository
                 .findByNowmeIdAndActiveTrueOrderByCreatedAtDesc(nowmeId, pageable)
-                .map(comment -> new CommentDto(
+                .map(comment -> new CommentResponse(
                         comment.getId(),
                         comment.getUser().getId(),
                         comment.getUser().getAvatar(),

@@ -36,6 +36,10 @@ public class JwtService {
                 .sign(algorithm);
     }
 
+    public Date getRefreshTokenExpiresAt() {
+        return new Date(System.currentTimeMillis() + REFRESH_EXP);
+    }
+
     public DecodedJWT verify(String token) {
         return JWT.require(algorithm).build().verify(token);
     }
@@ -68,5 +72,9 @@ public class JwtService {
             throw new RuntimeException("TOKEN_REQUIRED");
         }
         return token.startsWith("Bearer ") ? token.substring(7) : token;
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return extractUserId(normalizeBearerToken(token));
     }
 }

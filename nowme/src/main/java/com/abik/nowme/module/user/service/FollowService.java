@@ -18,8 +18,7 @@ public class FollowService {
     private final JwtService jwtService;
 
     public void follow(String token, Long userIdToFollow) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long followerId = jwtService.extractUserId(cleanToken);
+        Long followerId = jwtService.getUserIdFromToken(token);
 
         User follower = userRepository.findByIdAndActiveTrue(followerId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -28,11 +27,11 @@ public class FollowService {
                 .orElseThrow(() -> new RuntimeException("USER_TO_FOLLOW_NOT_FOUND"));
 
         if (follower.getId().equals(user.getId())) {
-            throw new RuntimeException("You can not follow yourself");
+            throw new RuntimeException("CANNOT_FOLLOW_YOURSELF");
         }
 
         if (followRepository.existsByFollowing_IdAndFollower_Id(user.getId(), follower.getId())) {
-            throw new RuntimeException("You are already following");
+            throw new RuntimeException("ALREADY_FOLLOWING");
         }
 
         Follow follow = new Follow();
@@ -44,8 +43,7 @@ public class FollowService {
 
     @Transactional
     public void unfollow(String token, Long userIdToUnfollow) {
-        String cleanToken = jwtService.normalizeBearerToken(token);
-        Long followerId = jwtService.extractUserId(cleanToken);
+        Long followerId = jwtService.getUserIdFromToken(token);
 
         User follower = userRepository.findByIdAndActiveTrue(followerId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
