@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
             case "USER_NOT_FOUND", "PROFILE_USER_NOT_FOUND", "NOWME_NOT_FOUND", "FILE_NOT_FOUND",
                  "USER_TO_FOLLOW_NOT_FOUND", "USER_TO_UNFOLLOW_NOT_FOUND" ->
                     new ErrorDescriptor(HttpStatus.NOT_FOUND, message);
-            case "ACCESS_DENIED", "IMAGE_ACCESS_DENIED", "NOWME_FORBIDDEN" ->
+            case "ACCESS_DENIED", "IMAGE_ACCESS_DENIED", "NOWME_ACCESS_DENIED" ->
                     new ErrorDescriptor(HttpStatus.FORBIDDEN, message);
             case "WRONG_PASSWORD", "TOKEN_REQUIRED", "INVALID_TOKEN",
                  "INVALID_REFRESH_TOKEN", "TOKEN_MISMATCH" ->

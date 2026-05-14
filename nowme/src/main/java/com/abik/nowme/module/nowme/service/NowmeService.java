@@ -195,7 +195,7 @@ public class NowmeService {
             throw new RuntimeException("USER_NOT_FOUND");
         }
         if (!nowme.getUser().getId().equals(userId)) {
-            throw new RuntimeException("NOWME_FORBIDDEN");
+            throw new RuntimeException("NOWME_ACCESS_DENIED");
         }
 
         return nowme;
