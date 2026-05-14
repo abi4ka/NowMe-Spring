@@ -29,6 +29,7 @@ public class Comment {
 
     private String content;
 
+    @Column(nullable = false, updatable = false, columnDefinition = "TEXT")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
