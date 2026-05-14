@@ -6,10 +6,10 @@ import com.abik.nowme.module.user.dto.UserSearchResponse;
 import com.abik.nowme.module.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -40,11 +40,12 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public List<UserSearchResponse> searchUsers(
+    public Page<UserSearchResponse> searchUsers(
             @RequestHeader("Authorization") String token,
-            @RequestParam String query
+            @RequestParam String query,
+            Pageable pageable
     ) {
-        return userService.searchUsers(token, query);
+        return userService.searchUsers(token, query, pageable);
     }
 
     @PutMapping("/avatar")

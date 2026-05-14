@@ -9,6 +9,8 @@ import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserFollowRepository;
 import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -70,19 +72,16 @@ public class UserService {
         );
     }
 
-    public List<UserSearchResponse> searchUsers(String token, String query) {
+    public Page<UserSearchResponse> searchUsers(String token, String query, Pageable pageable) {
         Long userId = jwtService.getUserIdFromToken(token);
         requireActiveUser(userId);
 
-        List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndActiveTrue(query);
-
-        return users.stream()
+        return userRepository.findByUsernameContainingIgnoreCaseAndActiveTrue(query, pageable)
                 .map(user -> new UserSearchResponse(
                         user.getId(),
                         user.getUsername(),
                         user.getAvatar()
-                ))
-                .toList();
+                ));
     }
 
     private long calculateStreakDays(Long userId) {
