@@ -1,11 +1,13 @@
 package com.abik.nowme.module.nowme.service;
 
 import com.abik.nowme.module.nowme.dto.NowmeResponse;
+import com.abik.nowme.module.nowme.entity.Comment;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
+import com.abik.nowme.module.user.Visibility;
 import com.abik.nowme.module.user.entity.User;
 import com.abik.nowme.module.user.repository.UserFollowRepository;
 import com.abik.nowme.module.user.repository.UserRepository;
@@ -113,7 +115,7 @@ public class NowmeService {
         Map<Long, Boolean> likedMap = likedIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> true));
 
-        List<NowmeResponse> content = mapToDto(pageContent, likeCounts, commentCounts, likedMap);
+        List<NowmeResponse> content = mapToDto(pageContent, likeCounts, commentCounts, likedMap, userId);
 
         return new PageImpl<>(content, pageable, availableNowmes.size());
     }
@@ -153,14 +155,46 @@ public class NowmeService {
         Map<Long, Boolean> likedMap = likedIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> true));
 
-        return mapToDto(profileNowmes, likeCounts, commentCounts, likedMap);
+        return mapToDto(profileNowmes, likeCounts, commentCounts, likedMap, userId);
+    }
+
+    public NowmeResponse updateVisibility(String token, Long nowmeId, Visibility visibility) {
+        Long userId = jwtService.getUserIdFromToken(token);
+
+        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
+                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        if (!nowme.getUser().isActive()) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
+        if (!nowme.getUser().getId().equals(userId)) {
+            throw new RuntimeException("NOWME_FORBIDDEN");
+        }
+
+        nowme.setVisibility(visibility);
+        nowmeRepository.save(nowme);
+
+        long likes = nowmeLikeRepository.countByNowmeId(nowmeId);
+        long comments = commentRepository.findByNowmeId(nowmeId).stream()
+                .filter(Comment::isActive)
+                .count();
+        boolean liked = nowmeLikeRepository.findByUserIdAndNowmeId(userId, nowmeId).isPresent();
+
+        return mapToDto(
+                List.of(nowme),
+                Map.of(nowmeId, likes),
+                Map.of(nowmeId, comments),
+                Map.of(nowmeId, liked),
+                userId
+        ).get(0);
     }
 
     private List<NowmeResponse> mapToDto(
             List<Nowme> nowmes,
             Map<Long, Long> likeCounts,
             Map<Long, Long> commentCounts,
-            Map<Long, Boolean> likedMap
+            Map<Long, Boolean> likedMap,
+            Long viewerId
     ) {
         return nowmes.stream()
                 .map(nowme -> new NowmeResponse(
@@ -168,10 +202,12 @@ public class NowmeService {
                         nowme.getUser().getId(),
                         nowme.getDescription(),
                         nowme.getCreationTime(),
+                        nowme.getVisibility(),
                         likeCounts.getOrDefault(nowme.getId(), 0L),
                         commentCounts.getOrDefault(nowme.getId(), 0L),
                         nowme.getUser().getUsername(),
                         nowme.getUser().getAvatar(),
+                        nowme.getUser().getId().equals(viewerId),
                         nowme.getFavorite(),
                         likedMap.getOrDefault(nowme.getId(), false)
                 ))

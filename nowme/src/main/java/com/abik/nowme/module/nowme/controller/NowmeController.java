@@ -3,6 +3,7 @@ package com.abik.nowme.module.nowme.controller;
 import com.abik.nowme.module.nowme.dto.CommentResponse;
 import com.abik.nowme.module.nowme.dto.CommentRequest;
 import com.abik.nowme.module.nowme.dto.NowmeResponse;
+import com.abik.nowme.module.nowme.dto.UpdateNowmeVisibilityRequest;
 import com.abik.nowme.module.nowme.service.CommentService;
 import com.abik.nowme.module.nowme.service.ImageService;
 import com.abik.nowme.module.nowme.service.LikeService;
@@ -63,6 +64,16 @@ public class NowmeController {
             @PathVariable Long userId) {
 
         return nowmeService.getProfileNowmes(token, userId);
+    }
+
+    @PutMapping("/{id}/visibility")
+    public ResponseEntity<NowmeResponse> updateVisibility(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateNowmeVisibilityRequest request) {
+        NowmeResponse response = nowmeService.updateVisibility(token, id, request.visibility());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/like")
