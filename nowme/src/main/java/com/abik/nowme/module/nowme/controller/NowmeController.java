@@ -76,6 +76,15 @@ public class NowmeController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNowme(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id) {
+        nowmeService.deleteNowme(token, id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/like")
     public ResponseEntity<Long> like(
             @RequestHeader("Authorization") String token,

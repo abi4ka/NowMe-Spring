@@ -189,6 +189,23 @@ public class NowmeService {
         ).get(0);
     }
 
+    public void deleteNowme(String token, Long nowmeId) {
+        Long userId = jwtService.getUserIdFromToken(token);
+
+        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
+                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
+
+        if (!nowme.getUser().isActive()) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
+        if (!nowme.getUser().getId().equals(userId)) {
+            throw new RuntimeException("NOWME_FORBIDDEN");
+        }
+
+        nowme.setActive(false);
+        nowmeRepository.save(nowme);
+    }
+
     private List<NowmeResponse> mapToDto(
             List<Nowme> nowmes,
             Map<Long, Long> likeCounts,
