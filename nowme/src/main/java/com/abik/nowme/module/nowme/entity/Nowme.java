@@ -25,8 +25,8 @@ public class Nowme {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private LocalDateTime creationTime = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime creationTime= LocalDateTime.now();;
 
     @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;

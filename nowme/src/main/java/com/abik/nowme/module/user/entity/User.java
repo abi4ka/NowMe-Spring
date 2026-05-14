@@ -29,8 +29,8 @@ public class User {
     @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;
 
-    @Column(nullable = false)
-    private LocalDateTime registerTime = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime registerTime= LocalDateTime.now();;
 
     @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY)
     private List<Follow> following;
