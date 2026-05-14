@@ -76,6 +76,15 @@ public class NowmeController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}/favorite")
+    public ResponseEntity<NowmeResponse> toggleFavorite(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id) {
+        NowmeResponse response = nowmeService.toggleFavorite(token, id);
+
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNowme(
             @RequestHeader("Authorization") String token,

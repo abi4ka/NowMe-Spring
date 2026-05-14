@@ -161,9 +161,36 @@ public class NowmeService {
     public NowmeResponse updateVisibility(String token, Long nowmeId, Visibility visibility) {
         Long userId = jwtService.getUserIdFromToken(token);
 
+        Nowme nowme = findOwnedNowme(userId, nowmeId);
+
+        nowme.setVisibility(visibility);
+        nowmeRepository.save(nowme);
+
+        return mapSingleNowme(nowme, userId);
+    }
+
+    public NowmeResponse toggleFavorite(String token, Long nowmeId) {
+        Long userId = jwtService.getUserIdFromToken(token);
+
+        Nowme nowme = findOwnedNowme(userId, nowmeId);
+        nowme.setFavorite(!Boolean.TRUE.equals(nowme.getFavorite()));
+        nowmeRepository.save(nowme);
+
+        return mapSingleNowme(nowme, userId);
+    }
+
+    public void deleteNowme(String token, Long nowmeId) {
+        Long userId = jwtService.getUserIdFromToken(token);
+
+        Nowme nowme = findOwnedNowme(userId, nowmeId);
+
+        nowme.setActive(false);
+        nowmeRepository.save(nowme);
+    }
+
+    private Nowme findOwnedNowme(Long userId, Long nowmeId) {
         Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
                 .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
-
         if (!nowme.getUser().isActive()) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
@@ -171,9 +198,11 @@ public class NowmeService {
             throw new RuntimeException("NOWME_FORBIDDEN");
         }
 
-        nowme.setVisibility(visibility);
-        nowmeRepository.save(nowme);
+        return nowme;
+    }
 
+    private NowmeResponse mapSingleNowme(Nowme nowme, Long userId) {
+        Long nowmeId = nowme.getId();
         long likes = nowmeLikeRepository.countByNowmeId(nowmeId);
         long comments = commentRepository.findByNowmeId(nowmeId).stream()
                 .filter(Comment::isActive)
@@ -187,23 +216,6 @@ public class NowmeService {
                 Map.of(nowmeId, liked),
                 userId
         ).get(0);
-    }
-
-    public void deleteNowme(String token, Long nowmeId) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
-        Nowme nowme = nowmeRepository.findByIdAndActiveTrue(nowmeId)
-                .orElseThrow(() -> new RuntimeException("NOWME_NOT_FOUND"));
-
-        if (!nowme.getUser().isActive()) {
-            throw new RuntimeException("USER_NOT_FOUND");
-        }
-        if (!nowme.getUser().getId().equals(userId)) {
-            throw new RuntimeException("NOWME_FORBIDDEN");
-        }
-
-        nowme.setActive(false);
-        nowmeRepository.save(nowme);
     }
 
     private List<NowmeResponse> mapToDto(
