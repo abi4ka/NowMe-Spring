@@ -58,6 +58,13 @@ public class NowmeController {
         return nowmeService.getUserNowmesLast7Days(token, page, size);
     }
 
+    @GetMapping("/me/history")
+    public List<NowmeResponse> getMyNowmeHistory(
+            @RequestHeader("Authorization") String token) {
+
+        return nowmeService.getMyNowmeHistory(token);
+    }
+
     @GetMapping("/users/{userId}")
     public List<NowmeResponse> getProfileNowmes(
             @RequestHeader("Authorization") String token,

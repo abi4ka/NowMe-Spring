@@ -31,6 +31,24 @@ public class NowmeAccessService {
         return hasAccess(userId, nowme, false);
     }
 
+    public boolean hasProfileAccess(Long userId, Nowme nowme) {
+        if (!nowme.isActive() || !nowme.getUser().isActive()) {
+            return false;
+        }
+
+        Long authorId = nowme.getUser().getId();
+        if (authorId.equals(userId)) {
+            return true;
+        }
+
+        if (nowme.getVisibility() == Visibility.PUBLIC) {
+            return true;
+        }
+
+        return nowme.getVisibility() == Visibility.FRIENDS_ONLY
+                && friendshipService.areFriends(userId, authorId);
+    }
+
     private boolean hasAccess(Long userId, Nowme nowme, boolean allowFavorite) {
         if (!nowme.isActive() || !nowme.getUser().isActive()) {
             return false;

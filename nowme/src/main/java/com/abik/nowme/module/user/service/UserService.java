@@ -85,7 +85,7 @@ public class UserService {
     }
 
     private long calculateStreakDays(Long userId) {
-        List<Nowme> nowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(List.of(userId));
+        List<Nowme> nowmes = nowmeRepository.findByUser_IdAndActiveTrueOrderByCreationTimeDesc(userId);
         if (nowmes.isEmpty()) {
             return 0L;
         }
