@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class NowmeService {
+
+    private static final int VISIBLE_POST_DAYS = 7;
 
     private final NowmeRepository nowmeRepository;
     private final UserRepository userRepository;
@@ -82,7 +85,10 @@ public class NowmeService {
                 .distinct()
                 .toList();
 
-        List<Nowme> availableNowmes = nowmeRepository.findActiveByActiveUserIdInOrderByCreationTimeDesc(authorIds).stream()
+        List<Nowme> availableNowmes = nowmeRepository.findActiveByActiveUserIdInSinceOrderByCreationTimeDesc(
+                        authorIds,
+                        getVisiblePostsSince()
+                ).stream()
                 .filter(nowme -> nowmeAccessService.hasFeedAccess(userId, nowme))
                 .toList();
 
@@ -130,8 +136,11 @@ public class NowmeService {
             throw new RuntimeException("PROFILE_USER_NOT_FOUND");
         }
 
-        List<Nowme> profileNowmes = nowmeRepository.findByUser_IdAndActiveTrueOrderByCreationTimeDesc(profileUserId).stream()
-                .filter(nowme -> userId.equals(profileUserId) || nowmeAccessService.hasAccess(userId, nowme))
+        List<Nowme> profileNowmes = nowmeRepository.findActiveByUserIdVisibleOnProfileOrderByCreationTimeDesc(
+                        profileUserId,
+                        getVisiblePostsSince()
+                ).stream()
+                .filter(nowme -> nowmeAccessService.hasProfileAccess(userId, nowme))
                 .toList();
 
         List<Long> nowmeIds = profileNowmes.stream()
@@ -156,6 +165,39 @@ public class NowmeService {
                 .collect(Collectors.toMap(id -> id, id -> true));
 
         return mapToDto(profileNowmes, likeCounts, commentCounts, likedMap, userId);
+    }
+
+    public List<NowmeResponse> getMyNowmeHistory(String token) {
+        Long userId = jwtService.getUserIdFromToken(token);
+
+        if (!userRepository.existsByIdAndActiveTrue(userId)) {
+            throw new RuntimeException("USER_NOT_FOUND");
+        }
+
+        List<Nowme> historyNowmes = nowmeRepository.findByUser_IdAndActiveTrueOrderByCreationTimeDesc(userId);
+
+        List<Long> nowmeIds = historyNowmes.stream()
+                .map(Nowme::getId)
+                .toList();
+
+        Map<Long, Long> likeCounts = nowmeIds.isEmpty()
+                ? Collections.emptyMap()
+                : nowmeLikeRepository.countByNowmeIdIn(nowmeIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+        Map<Long, Long> commentCounts = nowmeIds.isEmpty()
+                ? Collections.emptyMap()
+                : commentRepository.countByNowmeIdIn(nowmeIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+        List<Long> likedIds = nowmeIds.isEmpty()
+                ? Collections.emptyList()
+                : nowmeLikeRepository.findLikedNowmeIds(userId, nowmeIds);
+
+        Map<Long, Boolean> likedMap = likedIds.stream()
+                .collect(Collectors.toMap(id -> id, id -> true));
+
+        return mapToDto(historyNowmes, likeCounts, commentCounts, likedMap, userId);
     }
 
     public NowmeResponse updateVisibility(String token, Long nowmeId, Visibility visibility) {
@@ -199,6 +241,10 @@ public class NowmeService {
         }
 
         return nowme;
+    }
+
+    private LocalDateTime getVisiblePostsSince() {
+        return LocalDateTime.now().minusDays(VISIBLE_POST_DAYS);
     }
 
     private NowmeResponse mapSingleNowme(Nowme nowme, Long userId) {
