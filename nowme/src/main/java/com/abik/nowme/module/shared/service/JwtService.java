@@ -6,6 +6,8 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -36,8 +38,8 @@ public class JwtService {
                 .sign(algorithm);
     }
 
-    public Date getRefreshTokenExpiresAt() {
-        return new Date(System.currentTimeMillis() + REFRESH_EXP);
+    public LocalDateTime getRefreshTokenExpiresAt() {
+        return LocalDateTime.now().plus(Duration.ofMillis(REFRESH_EXP));
     }
 
     public DecodedJWT verify(String token) {

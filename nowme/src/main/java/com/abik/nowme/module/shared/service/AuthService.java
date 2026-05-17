@@ -9,7 +9,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +82,7 @@ public class AuthService {
         String access = jwtService.generateAccessToken(userId);
         String refresh = jwtService.generateRefreshToken(userId);
 
-        Date expiresAt = jwtService.getRefreshTokenExpiresAt();
+        LocalDateTime expiresAt = jwtService.getRefreshTokenExpiresAt();
 
         refreshTokenService.save(userId, refresh, expiresAt);
 

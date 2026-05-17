@@ -5,7 +5,7 @@ import com.abik.nowme.module.shared.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +13,7 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository repository;
 
-    public void save(Long userId, String token, Date expiresAt) {
+    public void save(Long userId, String token, LocalDateTime expiresAt) {
 
         RefreshToken entity = RefreshToken.builder()
                 .userId(userId)
@@ -33,7 +33,7 @@ public class RefreshTokenService {
             return false;
         }
 
-        if (entity.getExpiresAt().before(new Date())) {
+        if (entity.getExpiresAt().isBefore(LocalDateTime.now())) {
             return false;
         }
 

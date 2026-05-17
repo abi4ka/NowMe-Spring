@@ -3,7 +3,7 @@ package com.abik.nowme.module.shared.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -24,6 +24,6 @@ public class RefreshToken {
     @Column(nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
-    private Date expiresAt;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private LocalDateTime expiresAt;
 }
