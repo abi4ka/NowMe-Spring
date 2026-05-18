@@ -76,8 +76,8 @@ public class UserService {
         Long userId = jwtService.getUserIdFromToken(token);
         requireActiveUser(userId);
 
-        return userRepository.findByUsernameContainingIgnoreCaseAndActiveTrue(query, pageable)
-                .map(user -> new UserSearchResponse(
+        return userRepository
+                .findByUsernameStartingWithIgnoreCaseAndActiveTrue(query, pageable)                .map(user -> new UserSearchResponse(
                         user.getId(),
                         user.getUsername(),
                         user.getAvatar()
