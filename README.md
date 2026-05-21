@@ -12,8 +12,8 @@ The server receives photo posts, protects user data with JWT-based authenticatio
 
 ## Project Pair
 
-- **NowMe Android**: the mobile client that users interact with.
-- **NowMe Spring**: this backend REST API.
+- [**NowMe Android**](https://github.com/abi4ka/NowMe-Android): the mobile client that users interact with.
+- [**NowMe Spring**](https://github.com/abi4ka/NowMe-Spring): this backend REST API.
 
 The Android app is configured to call the backend locally at:
 
