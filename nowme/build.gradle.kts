@@ -41,6 +41,9 @@ dependencies {
 	runtimeOnly("org.postgresql:postgresql")
 	runtimeOnly("org.xerial:sqlite-jdbc")
 
+	// Security Crypto (BCrypt)
+	implementation("org.springframework.security:spring-security-crypto")
+
 	// JWT
 	implementation("com.auth0:java-jwt:4.4.0")
 

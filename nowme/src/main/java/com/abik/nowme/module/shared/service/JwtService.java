@@ -11,14 +11,19 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Service
 public class JwtService {
 
-    private final String SECRET = "i4exmjh9lpa5wt9sve0lfm2y7vvs4ke1iil8zqf5";
-    private final Algorithm algorithm = Algorithm.HMAC256(SECRET);
+    private final Algorithm algorithm;
 
     private static final long ACCESS_EXP = 1000 * 60 * 15 * 8;      // 2h
     private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7 * 4; // 28days
+
+    public JwtService(@Value("${security.jwt.secret:i4exmjh9lpa5wt9sve0lfm2y7vvs4ke1iil8zqf5}") String secret) {
+        this.algorithm = Algorithm.HMAC256(secret);
+    }
 
     public String generateAccessToken(Long userId) {
         return JWT.create()

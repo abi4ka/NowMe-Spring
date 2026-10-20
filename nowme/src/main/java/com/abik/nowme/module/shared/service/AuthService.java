@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -18,6 +20,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthResponse register(RegisterRequest request) {
 
@@ -27,7 +30,7 @@ public class AuthService {
 
         User user = new User();
         user.setUsername(request.username());
-        user.setPassword(request.password());
+        user.setPassword(passwordEncoder.encode(request.password()));
         userRepository.save(user);
 
         return generateTokens(user.getId());
@@ -38,7 +41,15 @@ public class AuthService {
         User user = userRepository.findByUsernameAndActiveTrue(request.username())
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        if (!user.getPassword().equals(request.password())) {
+        boolean matches = passwordEncoder.matches(request.password(), user.getPassword());
+        if (!matches && user.getPassword().equals(request.password())) {
+            // Automatic upgrade for legacy plain-text password
+            user.setPassword(passwordEncoder.encode(request.password()));
+            userRepository.save(user);
+            matches = true;
+        }
+
+        if (!matches) {
             throw new RuntimeException("WRONG_PASSWORD");
         }
 
