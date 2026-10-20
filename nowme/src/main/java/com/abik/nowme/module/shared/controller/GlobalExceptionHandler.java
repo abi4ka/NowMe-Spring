@@ -15,8 +15,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.abik.nowme.module.shared.exception.ApiException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<Map<String, String>> handleApiException(ApiException e) {
+        return buildErrorResponse(e.getStatus(), e.getErrorCode());
+    }
 
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<Map<String, String>> handleExpiredToken(TokenExpiredException e) {
@@ -95,7 +102,7 @@ public class GlobalExceptionHandler {
 
         return switch (message) {
             case "USER_NOT_FOUND", "PROFILE_USER_NOT_FOUND", "NOWME_NOT_FOUND", "FILE_NOT_FOUND",
-                 "USER_TO_FOLLOW_NOT_FOUND", "USER_TO_UNFOLLOW_NOT_FOUND" ->
+                 "USER_TO_FOLLOW_NOT_FOUND", "USER_TO_UNFOLLOW_NOT_FOUND", "LIKE_NOT_FOUND" ->
                     new ErrorDescriptor(HttpStatus.NOT_FOUND, message);
             case "ACCESS_DENIED", "IMAGE_ACCESS_DENIED", "NOWME_ACCESS_DENIED" ->
                     new ErrorDescriptor(HttpStatus.FORBIDDEN, message);
