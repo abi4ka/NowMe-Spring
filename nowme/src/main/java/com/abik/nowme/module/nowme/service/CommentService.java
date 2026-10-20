@@ -20,13 +20,9 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
-    private final JwtService jwtService;
     private final NowmeAccessService nowmeAccessService;
 
-
-    public CommentResponse createComment(String token, Long nowmeId, String content) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public CommentResponse createComment(Long userId, Long nowmeId, String content) {
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
@@ -57,9 +53,7 @@ public class CommentService {
         );
     }
 
-    public Page<CommentResponse> getComments(String token, Long nowmeId, int page, int size) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public Page<CommentResponse> getComments(Long userId, Long nowmeId, int page, int size) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }

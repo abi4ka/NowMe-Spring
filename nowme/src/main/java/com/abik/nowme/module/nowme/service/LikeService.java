@@ -14,15 +14,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LikeService {
 
-    private final JwtService jwtService;
     private final UserRepository userRepository;
     private final NowmeRepository nowmeRepository;
     private final NowmeLikeRepository likeRepository;
     private final NowmeAccessService nowmeAccessService;
 
-    public Long like(String token, Long nowmeId) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public Long like(Long userId, Long nowmeId) {
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
@@ -53,9 +50,7 @@ public class LikeService {
         return likeRepository.countByNowmeId(nowmeId);
     }
 
-    public Long unlike(String token, Long nowmeId) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public Long unlike(Long userId, Long nowmeId) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }

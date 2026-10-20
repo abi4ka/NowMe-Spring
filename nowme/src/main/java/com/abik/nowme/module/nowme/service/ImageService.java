@@ -21,13 +21,10 @@ public class ImageService {
 
     private final Path uploadDir = Paths.get("uploads");
     private final NowmeRepository nowmeRepository;
-    private final JwtService jwtService;
     private final NowmeAccessService nowmeAccessService;
     private final UserRepository userRepository;
 
-    public Resource getNowmeImageById(String token, Long id) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public Resource getNowmeImageById(Long userId, Long id) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }

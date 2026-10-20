@@ -40,18 +40,16 @@ public class NowmeService {
     private final NowmeRepository nowmeRepository;
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
-    private final JwtService jwtService;
     private final NowmeLikeRepository nowmeLikeRepository;
     private final CommentRepository commentRepository;
     private final NowmeAccessService nowmeAccessService;
 
-    public Long createNowme(String token, MultipartFile image, String description) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public Long createNowme(Long userId, MultipartFile image, String description) {
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+        String originalName = image.getOriginalFilename() != null ? Paths.get(image.getOriginalFilename()).getFileName().toString() : "upload.jpg";
+        String fileName = UUID.randomUUID() + "_" + originalName;
         Path path = Paths.get("uploads/" + fileName);
 
         try {
@@ -71,9 +69,7 @@ public class NowmeService {
         return nowme.getId();
     }
 
-    public Page<NowmeResponse> getUserNowmesLast7Days(String token, int page, int size) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public Page<NowmeResponse> getUserNowmesLast7Days(Long userId, int page, int size) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
@@ -126,9 +122,7 @@ public class NowmeService {
         return new PageImpl<>(content, pageable, availableNowmes.size());
     }
 
-    public List<NowmeResponse> getProfileNowmes(String token, Long profileUserId) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public List<NowmeResponse> getProfileNowmes(Long userId, Long profileUserId) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
@@ -167,9 +161,7 @@ public class NowmeService {
         return mapToDto(profileNowmes, likeCounts, commentCounts, likedMap, userId);
     }
 
-    public List<NowmeResponse> getMyNowmeHistory(String token) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public List<NowmeResponse> getMyNowmeHistory(Long userId) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
@@ -200,9 +192,7 @@ public class NowmeService {
         return mapToDto(historyNowmes, likeCounts, commentCounts, likedMap, userId);
     }
 
-    public NowmeResponse updateVisibility(String token, Long nowmeId, Visibility visibility) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public NowmeResponse updateVisibility(Long userId, Long nowmeId, Visibility visibility) {
         Nowme nowme = findOwnedNowme(userId, nowmeId);
 
         nowme.setVisibility(visibility);
@@ -211,9 +201,7 @@ public class NowmeService {
         return mapSingleNowme(nowme, userId);
     }
 
-    public NowmeResponse toggleFavorite(String token, Long nowmeId) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public NowmeResponse toggleFavorite(Long userId, Long nowmeId) {
         Nowme nowme = findOwnedNowme(userId, nowmeId);
         nowme.setFavorite(!Boolean.TRUE.equals(nowme.getFavorite()));
         nowmeRepository.save(nowme);
@@ -221,9 +209,7 @@ public class NowmeService {
         return mapSingleNowme(nowme, userId);
     }
 
-    public void deleteNowme(String token, Long nowmeId) {
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public void deleteNowme(Long userId, Long nowmeId) {
         Nowme nowme = findOwnedNowme(userId, nowmeId);
 
         nowme.setActive(false);

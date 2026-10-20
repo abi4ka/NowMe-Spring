@@ -25,25 +25,21 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
     private final NowmeRepository nowmeRepository;
-    private final JwtService jwtService;
 
-    public UserProfileResponse getMyProfile(String token) {
-        Long userId = jwtService.getUserIdFromToken(token);
+    public UserProfileResponse getMyProfile(Long userId) {
         User user = getUserById(userId);
 
         return toProfileResponse(user, userId);
     }
 
-    public UserProfileResponse getProfileById(String token, Long profileId) {
-        Long userId = jwtService.getUserIdFromToken(token);
+    public UserProfileResponse getProfileById(Long userId, Long profileId) {
         requireActiveUser(userId);
         User user = getUserById(profileId);
 
         return toProfileResponse(user, userId);
     }
 
-    public UserProfileResponse getProfileByUsername(String token, String username) {
-        Long userId = jwtService.getUserIdFromToken(token);
+    public UserProfileResponse getProfileByUsername(Long userId, String username) {
         requireActiveUser(userId);
         User user = userRepository.findByUsernameAndActiveTrue(username)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
@@ -72,12 +68,12 @@ public class UserService {
         );
     }
 
-    public Page<UserSearchResponse> searchUsers(String token, String query, Pageable pageable) {
-        Long userId = jwtService.getUserIdFromToken(token);
+    public Page<UserSearchResponse> searchUsers(Long userId, String query, Pageable pageable) {
         requireActiveUser(userId);
 
         return userRepository
-                .findByUsernameStartingWithIgnoreCaseAndActiveTrue(query, pageable)                .map(user -> new UserSearchResponse(
+                .findByUsernameStartingWithIgnoreCaseAndActiveTrue(query, pageable)
+                .map(user -> new UserSearchResponse(
                         user.getId(),
                         user.getUsername(),
                         user.getAvatar()
@@ -132,9 +128,7 @@ public class UserService {
         }
     }
 
-    public void updateAvatar(String token, String avatar) {
-        Long userId = jwtService.extractUserId(jwtService.normalizeBearerToken(token));
-
+    public void updateAvatar(Long userId, String avatar) {
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 

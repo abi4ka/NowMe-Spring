@@ -1,5 +1,6 @@
 package com.abik.nowme.module.user.controller;
 
+import com.abik.nowme.config.CurrentUser;
 import com.abik.nowme.module.user.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,19 +15,19 @@ public class FollowController {
 
     @PostMapping("/{userId}")
     public ResponseEntity<String> follow(
-            @RequestHeader("Authorization") String token,
+            @CurrentUser Long followerId,
             @PathVariable Long userId
     ) {
-        followService.follow(token, userId);
+        followService.follow(followerId, userId);
         return ResponseEntity.ok("FOLLOW OK");
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<String> unfollow(
-            @RequestHeader("Authorization") String token,
+            @CurrentUser Long followerId,
             @PathVariable Long userId
     ) {
-        followService.unfollow(token, userId);
+        followService.unfollow(followerId, userId);
         return ResponseEntity.ok("UNFOLLOW OK");
     }
 }
