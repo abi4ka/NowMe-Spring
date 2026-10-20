@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nowme-backend
+    ports:
+      - "25565:25565"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./nowme-local.db:/app/nowme-local.db
+    restart: unless-stopped

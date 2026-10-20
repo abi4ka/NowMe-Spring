@@ -52,16 +52,19 @@ http://localhost:25565/
 
 ## Tech Stack
 
-- Java 25.
+- Java 21 / 25.
 - Spring Boot 4.
 - Spring Web.
 - Spring Data JPA.
 - Hibernate.
 - Jakarta Validation.
+- Spring Security Crypto (BCrypt password hashing).
+- OpenAPI 3 / Swagger UI (`springdoc-openapi`).
 - JWT with `java-jwt`.
 - Lombok.
 - SQLite for local development.
 - PostgreSQL driver included for database flexibility.
+- Docker & Docker Compose.
 - Gradle Kotlin DSL.
 
 ## Main Structure
@@ -135,6 +138,7 @@ Authentication:
 - `POST /auth/register`
 - `POST /auth/login`
 - `POST /auth/refresh`
+- `POST /auth/logout`
 
 NowMe posts:
 
@@ -163,6 +167,28 @@ Users and follows:
 - `PUT /users/avatar`
 - `POST /follow/{userId}`
 - `DELETE /follow/{userId}`
+
+## Interactive API Documentation (Swagger UI)
+
+When the server is running, the interactive OpenAPI 3 / Swagger documentation and testing UI is accessible at:
+
+```text
+http://localhost:25565/swagger-ui.html
+```
+
+Raw OpenAPI JSON specification:
+
+```text
+http://localhost:25565/api-docs
+```
+
+## Running with Docker
+
+You can run the application containerized using Docker and Docker Compose:
+
+```bash
+docker compose up --build
+```
 
 ## Relationship With The Android App
 
