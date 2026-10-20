@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/follow")
 @RequiredArgsConstructor
@@ -14,20 +16,20 @@ public class FollowController {
     private final FollowService followService;
 
     @PostMapping("/{userId}")
-    public ResponseEntity<String> follow(
+    public ResponseEntity<Map<String, String>> follow(
             @CurrentUser Long followerId,
             @PathVariable Long userId
     ) {
         followService.follow(followerId, userId);
-        return ResponseEntity.ok("FOLLOW OK");
+        return ResponseEntity.ok(Map.of("status", "FOLLOWED"));
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<String> unfollow(
+    public ResponseEntity<Map<String, String>> unfollow(
             @CurrentUser Long followerId,
             @PathVariable Long userId
     ) {
         followService.unfollow(followerId, userId);
-        return ResponseEntity.ok("UNFOLLOW OK");
+        return ResponseEntity.ok(Map.of("status", "UNFOLLOWED"));
     }
 }

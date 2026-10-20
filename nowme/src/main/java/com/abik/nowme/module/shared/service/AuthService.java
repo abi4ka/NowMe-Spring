@@ -88,6 +88,12 @@ public class AuthService {
         return generateTokens(userIdFromRefresh);
     }
 
+    public void logout(String refreshToken) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshTokenService.deleteByToken(refreshToken);
+        }
+    }
+
     private AuthResponse generateTokens(Long userId) {
 
         String access = jwtService.generateAccessToken(userId);

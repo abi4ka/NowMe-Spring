@@ -40,4 +40,10 @@ public class AuthController {
                 )
         );
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody RefreshRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
+    }
 }

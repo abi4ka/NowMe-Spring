@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,12 +32,13 @@ public class NowmeController {
     private final CommentService commentService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Long createNowme(
+    public ResponseEntity<Long> createNowme(
             @CurrentUser Long currentUserId,
             @RequestPart("image") MultipartFile image,
             @RequestPart(value = "description", required = false) String description) {
 
-        return nowmeService.createNowme(currentUserId, image, description);
+        Long id = nowmeService.createNowme(currentUserId, image, description);
+        return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
     @GetMapping("/{id}/image")
