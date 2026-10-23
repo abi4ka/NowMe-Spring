@@ -116,6 +116,32 @@ spring.datasource.password=${DB_PASSWORD:nowme}
 
 Override `DB_URL`, `DB_USERNAME` and `DB_PASSWORD` to point at another database. The application uses `spring.jpa.hibernate.ddl-auto=update`, so the schema is updated during development.
 
+## Demo Data
+
+On startup the backend fills an **empty** database with demo data (`InitialDataSeeder`): 13 interlinked accounts, ~230 posts with real photos, follows, friendships, likes and comments. All dates are relative to the moment of seeding.
+
+Main demo account, with the most data (4 months of history in the calendar, 35-day streak, 6 pinned posts, 5 friends / 3 followers / 2 following):
+
+- username: `nowme_star`
+- password: `Star2026!`
+
+Every other account uses the password `password123`:
+
+| Account | Relation to `nowme_star` |
+|---|---|
+| `anna_k`, `leo.travels`, `mia_cooks`, `sam_runs`, `zoe.art` | friends (mutual follow) |
+| `ben_photo`, `kate_music` | followed by `nowme_star`, don't follow back (`ben_photo` has friends-only posts that must stay hidden) |
+| `fan_tom`, `lucy_reads`, `olga_dev` | follow `nowme_star` |
+| `newbie_joe` | no posts, no follows (empty states) |
+| `ghost_user` | deactivated, must not appear anywhere |
+
+Controls (environment variables):
+
+- `SEED_ENABLED=false` turns seeding off (default `true`).
+- `SEED_RESET=true` **deletes all data** and seeds again. Use it when the feed gets stale: it only shows the last 7 days.
+
+The photos are in `nowme/src/main/resources/seed/photos` (sources and license in `SOURCES.md`) and are copied to `uploads/` as `seed_photo_*.jpg`.
+
 ## Running Locally
 
 From the backend module:

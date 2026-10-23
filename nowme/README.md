@@ -16,3 +16,8 @@ spring.datasource.password=${DB_PASSWORD:nowme}
 ```
 
 - Override `DB_URL`, `DB_USERNAME` and `DB_PASSWORD` to use another database.
+
+## Demo Data
+
+An empty database is filled with demo data on startup. Log in as `nowme_star` / `Star2026!` (other demo accounts use `password123`).
+Set `SEED_ENABLED=false` to turn it off, or `SEED_RESET=true` to wipe all data and seed again. See the root `README.md` for details.

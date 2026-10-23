@@ -28,6 +28,8 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/nowme
       DB_USERNAME: ${DB_USERNAME:-nowme}
       DB_PASSWORD: ${DB_PASSWORD:-nowme}
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      SEED_RESET: ${SEED_RESET:-false}
     volumes:
       - ./uploads:/app/uploads
     depends_on:
