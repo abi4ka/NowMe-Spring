@@ -25,7 +25,7 @@ public class Nowme {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, updatable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime creationTime = LocalDateTime.now();
 
     @Column(nullable = false)
@@ -37,7 +37,7 @@ public class Nowme {
     @Column(nullable = false)
     private String image;
 
-    @Column(nullable = true)
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

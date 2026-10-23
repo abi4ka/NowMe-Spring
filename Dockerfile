@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM eclipse-temurin:25-jdk-alpine AS builder
 WORKDIR /app
 COPY nowme/gradle gradle
 COPY nowme/gradlew gradlew
@@ -9,7 +9,7 @@ RUN ./gradlew dependencies --no-daemon || true
 COPY nowme/src src
 RUN ./gradlew bootJar -x test --no-daemon
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 RUN mkdir -p uploads

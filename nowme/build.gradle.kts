@@ -35,11 +35,9 @@ dependencies {
 
 	// JPA + Hibernate
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.hibernate.orm:hibernate-community-dialects")
 
 	// PostgreSQL
 	runtimeOnly("org.postgresql:postgresql")
-	runtimeOnly("org.xerial:sqlite-jdbc")
 
 	// Security Crypto (BCrypt)
 	implementation("org.springframework.security:spring-security-crypto")

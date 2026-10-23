@@ -62,8 +62,7 @@ http://localhost:25565/
 - OpenAPI 3 / Swagger UI (`springdoc-openapi`).
 - JWT with `java-jwt`.
 - Lombok.
-- SQLite for local development.
-- PostgreSQL driver included for database flexibility.
+- PostgreSQL.
 - Docker & Docker Compose.
 - Gradle Kotlin DSL.
 
@@ -97,17 +96,25 @@ nowme/src/main/java/com/abik/nowme/
 
 - JDK 25.
 - Gradle wrapper from the project.
-- Local SQLite database file `nowme-local.db` in the `nowme/` project root.
+- Docker, for the PostgreSQL container.
 
-The local profile is used by default:
+Start PostgreSQL from the repository root:
+
+```bash
+docker compose up -d postgres
+```
+
+It listens on `localhost:5435` with database `nowme`, user `nowme` and password `nowme`. The local profile is used by default:
 
 ```properties
 spring.profiles.default=local
 server.port=25565
-spring.datasource.url=jdbc:sqlite:./nowme-local.db
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5435/nowme}
+spring.datasource.username=${DB_USERNAME:nowme}
+spring.datasource.password=${DB_PASSWORD:nowme}
 ```
 
-If the database file is missing, SQLite can create an empty file on first start. The application uses `spring.jpa.hibernate.ddl-auto=update`, so the schema is updated during development.
+Override `DB_URL`, `DB_USERNAME` and `DB_PASSWORD` to point at another database. The application uses `spring.jpa.hibernate.ddl-auto=update`, so the schema is updated during development.
 
 ## Running Locally
 
@@ -184,7 +191,7 @@ http://localhost:25565/api-docs
 
 ## Running with Docker
 
-You can run the application containerized using Docker and Docker Compose:
+You can run the application and PostgreSQL containerized using Docker Compose:
 
 ```bash
 docker compose up --build

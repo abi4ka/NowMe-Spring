@@ -27,9 +27,10 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     private Nowme nowme;
 
+    @Column(length = 1000)
     private String content;
 
-    @Column(nullable = false, updatable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)

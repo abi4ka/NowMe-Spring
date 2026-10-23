@@ -29,7 +29,7 @@ public class User {
     @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;
 
-    @Column(nullable = false, updatable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime registerTime = LocalDateTime.now();
 
     @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY)

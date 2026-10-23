@@ -1,4 +1,22 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nowme-postgres
+    environment:
+      POSTGRES_DB: nowme
+      POSTGRES_USER: ${DB_USERNAME:-nowme}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nowme}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -6,7 +24,16 @@ services:
     container_name: nowme-backend
     ports:
       - "25565:25565"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/nowme
+      DB_USERNAME: ${DB_USERNAME:-nowme}
+      DB_PASSWORD: ${DB_PASSWORD:-nowme}
     volumes:
       - ./uploads:/app/uploads
-      - ./nowme-local.db:/app/nowme-local.db
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  postgres-data:
