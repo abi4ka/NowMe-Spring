@@ -1,7 +1,6 @@
 package com.abik.nowme.module.nowme.service;
 
 import com.abik.nowme.module.nowme.dto.NowmeResponse;
-import com.abik.nowme.module.nowme.entity.Comment;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
@@ -236,9 +235,7 @@ public class NowmeService {
     private NowmeResponse mapSingleNowme(Nowme nowme, Long userId) {
         Long nowmeId = nowme.getId();
         long likes = nowmeLikeRepository.countByNowmeId(nowmeId);
-        long comments = commentRepository.findByNowmeId(nowmeId).stream()
-                .filter(Comment::isActive)
-                .count();
+        long comments = commentRepository.countByNowmeIdAndActiveTrue(nowmeId);
         boolean liked = nowmeLikeRepository.findByUserIdAndNowmeId(userId, nowmeId).isPresent();
 
         return mapToDto(
