@@ -26,8 +26,10 @@ public class RefreshTokenService {
 
     public boolean isValid(Long userId, String token) {
 
-        RefreshToken entity = repository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token not found"));
+        RefreshToken entity = repository.findByToken(token).orElse(null);
+        if (entity == null) {
+            return false;
+        }
 
         if (!entity.getUserId().equals(userId)) {
             return false;

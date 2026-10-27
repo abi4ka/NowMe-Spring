@@ -3,6 +3,7 @@ package com.abik.nowme.module.user.service;
 import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
 import com.abik.nowme.module.shared.service.JwtService;
+import com.abik.nowme.module.shared.service.Paging;
 import com.abik.nowme.module.user.dto.UserProfileResponse;
 import com.abik.nowme.module.user.dto.UserSearchResponse;
 import com.abik.nowme.module.user.entity.User;
@@ -11,6 +12,7 @@ import com.abik.nowme.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -71,8 +73,13 @@ public class UserService {
     public Page<UserSearchResponse> searchUsers(Long userId, String query, Pageable pageable) {
         requireActiveUser(userId);
 
+        Pageable safePageable = Paging.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("username"));
+        if (query == null || query.isBlank()) {
+            return Page.empty(safePageable);
+        }
+
         return userRepository
-                .findByUsernameStartingWithIgnoreCaseAndActiveTrue(query, pageable)
+                .findByUsernameStartingWithIgnoreCaseAndActiveTrue(query.trim(), safePageable)
                 .map(user -> new UserSearchResponse(
                         user.getId(),
                         user.getUsername(),

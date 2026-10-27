@@ -5,6 +5,7 @@ import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
+import com.abik.nowme.module.shared.service.Paging;
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.Visibility;
 import com.abik.nowme.module.user.entity.User;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NowmeService {
 
-    private static final int VISIBLE_POST_DAYS = 7;
+    public static final int VISIBLE_POST_DAYS = 7;
 
     private final NowmeRepository nowmeRepository;
     private final UserRepository userRepository;
@@ -87,13 +88,13 @@ public class NowmeService {
                 .filter(nowme -> nowmeAccessService.hasFeedAccess(userId, nowme))
                 .toList();
 
-        Pageable pageable = PageRequest.of(page, size);
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), availableNowmes.size());
+        Pageable pageable = Paging.of(page, size);
+        long offset = pageable.getOffset();
 
-        List<Nowme> pageContent = start >= availableNowmes.size()
+        List<Nowme> pageContent = offset >= availableNowmes.size()
                 ? Collections.emptyList()
-                : availableNowmes.subList(start, end);
+                : availableNowmes.subList((int) offset,
+                        (int) Math.min(offset + pageable.getPageSize(), availableNowmes.size()));
 
         List<Long> nowmeIds = pageContent.stream()
                 .map(Nowme::getId)

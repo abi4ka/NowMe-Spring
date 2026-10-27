@@ -3,13 +3,18 @@ package com.abik.nowme.module.shared.controller;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +22,7 @@ import java.util.Map;
 
 import com.abik.nowme.module.shared.exception.ApiException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -65,9 +71,33 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(e.getStatusCode(), errorCode);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleUnreadableBody(HttpMessageNotReadableException e) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST");
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, String>> handleInvalidParameter(RuntimeException e) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER");
+    }
+
+    // Unique constraint races (double like/follow/register) end up here
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConflict(DataIntegrityViolationException e) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "CONFLICT");
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, String>> handleUploadTooLarge(MaxUploadSizeExceededException e) {
+        return buildErrorResponse(HttpStatus.CONTENT_TOO_LARGE, "FILE_TOO_LARGE");
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException e) {
         ErrorDescriptor error = mapRuntimeException(e);
+        if (error.status().is5xxServerError()) {
+            log.error("Unhandled exception", e);
+        }
 
         return buildErrorResponse(error.status(), error.errorCode());
     }

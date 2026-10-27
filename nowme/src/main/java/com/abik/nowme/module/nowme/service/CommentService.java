@@ -1,5 +1,6 @@
 package com.abik.nowme.module.nowme.service;
 
+import com.abik.nowme.module.shared.service.Paging;
 import com.abik.nowme.module.nowme.dto.CommentResponse;
 import com.abik.nowme.module.nowme.entity.Comment;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
@@ -69,7 +70,7 @@ public class CommentService {
             throw new RuntimeException("ACCESS_DENIED");
         }
 
-        PageRequest pageable = PageRequest.of(page, size);
+        PageRequest pageable = Paging.of(page, size);
 
         return commentRepository
                 .findByNowmeIdAndActiveTrueOrderByCreatedAtDesc(nowmeId, pageable)

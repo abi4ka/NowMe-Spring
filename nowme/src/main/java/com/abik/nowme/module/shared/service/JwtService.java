@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.UUID;
 
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +21,14 @@ public class JwtService {
 
     private static final long ACCESS_EXP = 1000 * 60 * 15 * 8;      // 2h
     private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7 * 4; // 28days
+    private static final int MIN_SECRET_LENGTH = 32;
 
-    public JwtService(@Value("${security.jwt.secret:i4exmjh9lpa5wt9sve0lfm2y7vvs4ke1iil8zqf5}") String secret) {
+    public JwtService(@Value("${security.jwt.secret:}") String secret) {
+        if (secret == null || secret.isBlank() || secret.length() < MIN_SECRET_LENGTH) {
+            throw new IllegalStateException(
+                    "security.jwt.secret must be set (JWT_SECRET env or .env file) and be at least "
+                            + MIN_SECRET_LENGTH + " characters long");
+        }
         this.algorithm = Algorithm.HMAC256(secret);
     }
 
@@ -29,6 +36,7 @@ public class JwtService {
         return JWT.create()
                 .withSubject(String.valueOf(userId))
                 .withClaim("type", "access")
+                .withJWTId(UUID.randomUUID().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_EXP))
                 .sign(algorithm);
@@ -38,6 +46,7 @@ public class JwtService {
         return JWT.create()
                 .withSubject(String.valueOf(userId))
                 .withClaim("type", "refresh")
+                .withJWTId(UUID.randomUUID().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_EXP))
                 .sign(algorithm);
@@ -82,6 +91,10 @@ public class JwtService {
     }
 
     public Long getUserIdFromToken(String token) {
-        return extractUserId(normalizeBearerToken(token));
+        DecodedJWT jwt = verify(normalizeBearerToken(token));
+        if (!"access".equals(jwt.getClaim("type").asString())) {
+            throw new RuntimeException("INVALID_TOKEN");
+        }
+        return Long.parseLong(jwt.getSubject());
     }
 }

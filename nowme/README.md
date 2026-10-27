@@ -4,6 +4,7 @@
 
 - Java 25
 - PostgreSQL (start it with `docker compose up -d postgres` from the repository root)
+- A `.env` file in the repository root with `JWT_SECRET` (at least 32 characters, see `.env.example`)
 
 ## Local Database
 

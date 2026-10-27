@@ -57,7 +57,7 @@ public class NowmeAccessService {
         Long authorId = nowme.getUser().getId();
         Visibility visibility = nowme.getVisibility();
         boolean isFavorite = Boolean.TRUE.equals(nowme.getFavorite());
-        boolean isFresh = !nowme.getCreationTime().isBefore(LocalDateTime.now().minusDays(7));
+        boolean isFresh = !nowme.getCreationTime().isBefore(LocalDateTime.now().minusDays(NowmeService.VISIBLE_POST_DAYS));
 
         if (authorId.equals(userId)) {
             return allowFavorite || isFresh;

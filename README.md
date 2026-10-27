@@ -98,13 +98,20 @@ nowme/src/main/java/com/abik/nowme/
 - Gradle wrapper from the project.
 - Docker, for the PostgreSQL container.
 
+Create a `.env` file in the repository root with a JWT signing secret (at least 32 characters). The backend refuses to start without it; both `docker compose` and the IDE / `./gradlew bootRun` read this file:
+
+```bash
+cp .env.example .env
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+```
+
 Start PostgreSQL from the repository root:
 
 ```bash
 docker compose up -d postgres
 ```
 
-It listens on `localhost:5435` with database `nowme`, user `nowme` and password `nowme`. The local profile is used by default:
+It listens on `localhost:5435` (bound to 127.0.0.1 only) with database `nowme`, user `nowme` and password `nowme`. The local profile is used by default:
 
 ```properties
 spring.profiles.default=local

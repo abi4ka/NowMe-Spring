@@ -49,7 +49,7 @@ class AuthServiceTest {
     void register_Success() {
         RegisterRequest request = new RegisterRequest("testuser", "securepass");
 
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+        when(userRepository.existsByUsernameIgnoreCase("testuser")).thenReturn(false);
         when(passwordEncoder.encode("securepass")).thenReturn("encoded_pass");
         when(jwtService.generateAccessToken(any())).thenReturn("mock_access_token");
         when(jwtService.generateRefreshToken(any())).thenReturn("mock_refresh_token");
@@ -66,7 +66,7 @@ class AuthServiceTest {
     @Test
     void register_DuplicateUsername_ThrowsException() {
         RegisterRequest request = new RegisterRequest("existinguser", "securepass");
-        when(userRepository.findByUsername("existinguser")).thenReturn(Optional.of(new User()));
+        when(userRepository.existsByUsernameIgnoreCase("existinguser")).thenReturn(true);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.register(request));
         assertEquals("USERNAME_ALREADY_EXISTS", exception.getMessage());
@@ -106,7 +106,16 @@ class AuthServiceTest {
         when(passwordEncoder.matches("wrongpass", "encoded_pass")).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.login(request));
-        assertEquals("WRONG_PASSWORD", exception.getMessage());
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
+    }
+
+    @Test
+    void login_UnknownUser_ThrowsSameErrorAsWrongPassword() {
+        LoginRequest request = new LoginRequest("nobody", "whatever1");
+        when(userRepository.findByUsernameAndActiveTrue("nobody")).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.login(request));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
     }
 
     @Test

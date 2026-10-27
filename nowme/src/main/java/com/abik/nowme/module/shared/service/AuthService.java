@@ -1,5 +1,6 @@
 package com.abik.nowme.module.shared.service;
 
+import com.abik.nowme.module.shared.exception.UnauthorizedException;
 import com.abik.nowme.module.user.dto.AuthResponse;
 import com.abik.nowme.module.user.dto.LoginRequest;
 import com.abik.nowme.module.user.dto.RegisterRequest;
@@ -24,7 +25,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
 
-        if (userRepository.findByUsername(request.username()).isPresent()) {
+        if (userRepository.existsByUsernameIgnoreCase(request.username())) {
             throw new RuntimeException("USERNAME_ALREADY_EXISTS");
         }
 
@@ -38,20 +39,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
 
+        // Same error for unknown user and wrong password, so usernames can't be probed via login
         User user = userRepository.findByUsernameAndActiveTrue(request.username())
-                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
-
-        boolean matches = passwordEncoder.matches(request.password(), user.getPassword());
-        if (!matches && user.getPassword().equals(request.password())) {
-            // Automatic upgrade for legacy plain-text password
-            user.setPassword(passwordEncoder.encode(request.password()));
-            userRepository.save(user);
-            matches = true;
-        }
-
-        if (!matches) {
-            throw new RuntimeException("WRONG_PASSWORD");
-        }
+                .filter(u -> passwordEncoder.matches(request.password(), u.getPassword()))
+                .orElseThrow(() -> new UnauthorizedException("INVALID_CREDENTIALS"));
 
         return generateTokens(user.getId());
     }
