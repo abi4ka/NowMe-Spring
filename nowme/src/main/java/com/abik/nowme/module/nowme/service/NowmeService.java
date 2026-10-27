@@ -5,6 +5,7 @@ import com.abik.nowme.module.nowme.entity.Nowme;
 import com.abik.nowme.module.nowme.repository.CommentRepository;
 import com.abik.nowme.module.nowme.repository.NowmeLikeRepository;
 import com.abik.nowme.module.nowme.repository.NowmeRepository;
+import com.abik.nowme.module.shared.exception.BadRequestException;
 import com.abik.nowme.module.shared.service.Paging;
 import com.abik.nowme.module.shared.service.JwtService;
 import com.abik.nowme.module.user.Visibility;
@@ -19,15 +20,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
@@ -36,6 +32,7 @@ import java.util.stream.Collectors;
 public class NowmeService {
 
     public static final int VISIBLE_POST_DAYS = 7;
+    private static final int MAX_DESCRIPTION_LENGTH = 2000;
 
     private final NowmeRepository nowmeRepository;
     private final UserRepository userRepository;
@@ -43,28 +40,30 @@ public class NowmeService {
     private final NowmeLikeRepository nowmeLikeRepository;
     private final CommentRepository commentRepository;
     private final NowmeAccessService nowmeAccessService;
+    private final ImageStorage imageStorage;
 
     public Long createNowme(Long userId, MultipartFile image, String description) {
         User user = userRepository.findByIdAndActiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
-        String originalName = image.getOriginalFilename() != null ? Paths.get(image.getOriginalFilename()).getFileName().toString() : "upload.jpg";
-        String fileName = UUID.randomUUID() + "_" + originalName;
-        Path path = Paths.get("uploads/" + fileName);
-
-        try {
-            Files.createDirectories(path.getParent());
-            Files.write(path, image.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException("FAILED_TO_SAVE_IMAGE", e);
+        String trimmedDescription = description == null || description.isBlank() ? null : description.trim();
+        if (trimmedDescription != null && trimmedDescription.length() > MAX_DESCRIPTION_LENGTH) {
+            throw new BadRequestException("DESCRIPTION_TOO_LONG");
         }
+
+        String fileName = imageStorage.store(image);
 
         Nowme nowme = new Nowme();
         nowme.setUser(user);
         nowme.setImage(fileName);
-        nowme.setDescription(description);
+        nowme.setDescription(trimmedDescription);
 
-        nowmeRepository.save(nowme);
+        try {
+            nowmeRepository.save(nowme);
+        } catch (RuntimeException e) {
+            imageStorage.delete(fileName);
+            throw e;
+        }
 
         return nowme.getId();
     }
@@ -214,6 +213,11 @@ public class NowmeService {
 
         nowme.setActive(false);
         nowmeRepository.save(nowme);
+
+        // Demo posts share image files, so only remove a file nothing else shows
+        if (!nowmeRepository.existsByImageAndActiveTrue(nowme.getImage())) {
+            imageStorage.delete(nowme.getImage());
+        }
     }
 
     private Nowme findOwnedNowme(Long userId, Long nowmeId) {

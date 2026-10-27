@@ -13,16 +13,15 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.net.MalformedURLException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
 @RequiredArgsConstructor
 public class ImageService {
 
-    private final Path uploadDir = Paths.get("uploads");
     private final NowmeRepository nowmeRepository;
     private final NowmeAccessService nowmeAccessService;
     private final UserRepository userRepository;
+    private final ImageStorage imageStorage;
 
     public Resource getNowmeImageById(Long userId, Long id) {
         if (!userRepository.existsByIdAndActiveTrue(userId)) {
@@ -37,7 +36,7 @@ public class ImageService {
         }
 
         String filename = nowme.getImage();
-        Path path = uploadDir.resolve(filename);
+        Path path = imageStorage.resolve(filename);
 
         try {
             Resource resource = new UrlResource(path.toUri());

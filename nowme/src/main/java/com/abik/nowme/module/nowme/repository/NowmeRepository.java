@@ -28,6 +28,8 @@ public interface NowmeRepository extends JpaRepository<Nowme, Long> {
 
     Optional<Nowme> findByIdAndActiveTrue(Long id);
 
+    boolean existsByImageAndActiveTrue(String image);
+
     @Query("""
             select n
             from Nowme n
