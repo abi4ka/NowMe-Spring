@@ -1,12 +1,16 @@
 # NowMe Spring
 
+[![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![JWT](https://img.shields.io/badge/JWT-java--jwt%204.4.0-000000?logo=jsonwebtokens&logoColor=white)](https://github.com/auth0/java-jwt)
+[![OpenAPI](https://img.shields.io/badge/OpenAPI-springdoc%202.8.5-85EA2D?logo=swagger&logoColor=black)](https://springdoc.org)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![Gradle](https://img.shields.io/badge/Gradle-9.3.1-02303A?logo=gradle&logoColor=white)](https://gradle.org)
+
 Backend for **NowMe**, a daily photo-sharing app inspired by BeReal: post one photo a day, keep a calendar of your own life and see what your friends are up to.
 
 The Android client lives in [NowMe-Android](https://github.com/abi4ka/NowMe-Android).
-
-## Stack
-
-Java 25, Spring Boot 4 (Web, Data JPA, Validation), PostgreSQL 16, JWT (`java-jwt`), BCrypt, springdoc OpenAPI, Lombok, Gradle, Docker Compose.
 
 ## Quick Start
 
