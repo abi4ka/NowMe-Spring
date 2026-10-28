@@ -1,246 +1,112 @@
-# NowMe
-
-**NowMe** is a daily photo-sharing application inspired by the real app BeReal. The idea is to motivate users to take a photo every day, so they can follow the story of their own life, keep warm memories, and also see everyday moments from their friends' lives.
-
-The project was developed jointly by two students as their final project. It is split into two connected parts: an Android application for the user experience and a Spring backend for authentication, data storage, images, and social features.
-
 # NowMe Spring
 
-NowMe Spring is the backend server for this system. It provides the API, authentication, persistence, image handling, and social rules that make the Android client work as a real product instead of a standalone demo.
+Backend for **NowMe**, a daily photo-sharing app inspired by BeReal: post one photo a day, keep a calendar of your own life and see what your friends are up to.
 
-The server receives photo posts, protects user data with JWT-based authentication, serves images back to the app, and keeps track of profiles, follows, likes, comments, favorites, visibility, and personal history.
+The Android client lives in [NowMe-Android](https://github.com/abi4ka/NowMe-Android).
 
-## Project Pair
+## Stack
 
-- [**NowMe Android**](https://github.com/abi4ka/NowMe-Android): the mobile client that users interact with.
-- [**NowMe Spring**](https://github.com/abi4ka/NowMe-Spring): this backend REST API.
+Java 25, Spring Boot 4 (Web, Data JPA, Validation), PostgreSQL 16, JWT (`java-jwt`), BCrypt, springdoc OpenAPI, Lombok, Gradle, Docker Compose.
 
-The Android app is configured to call the backend locally at:
+## Quick Start
 
-```text
-http://10.0.2.2:25565/
-```
+You need JDK 25 and Docker.
 
-The Spring server itself runs on:
+1. Create `.env` in the repository root with a JWT signing secret of at least 32 characters. The server refuses to start without it.
 
-```text
-http://localhost:25565/
-```
+   ```bash
+   cp .env.example .env
+   sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$(openssl rand -base64 48)|" .env
+   ```
 
-## Features
+2. Start PostgreSQL:
 
-- User registration and login.
-- JWT access tokens.
-- Refresh token flow.
-- Protected endpoints using the `Authorization: Bearer <token>` header.
-- User profile loading by current user, id, or username.
-- User search with pagination.
-- Avatar update.
-- Follow and unfollow actions.
-- NowMe post creation with multipart image upload.
-- Feed of recent NowMe posts.
-- Profile post history.
-- Current user's full NowMe history.
-- Image serving for posts.
-- Likes and unlikes.
-- Comment creation and paginated comment loading.
-- Favorite toggle.
-- Post visibility control.
-- Post deletion.
-- Global exception handling.
-- Validation for request DTOs.
+   ```bash
+   docker compose up -d postgres
+   ```
 
-## Tech Stack
+3. Run the server, either from the IDE or with Gradle:
 
-- Java 21 / 25.
-- Spring Boot 4.
-- Spring Web.
-- Spring Data JPA.
-- Hibernate.
-- Jakarta Validation.
-- Spring Security Crypto (BCrypt password hashing).
-- OpenAPI 3 / Swagger UI (`springdoc-openapi`).
-- JWT with `java-jwt`.
-- Lombok.
-- PostgreSQL.
-- Docker & Docker Compose.
-- Gradle Kotlin DSL.
+   ```bash
+   cd nowme
+   ./gradlew bootRun
+   ```
 
-## Main Structure
+The API is served at `http://localhost:25565/`. Swagger UI is at `/swagger-ui.html`, and the OpenAPI JSON is at `/api-docs`.
 
-```text
-nowme/src/main/java/com/abik/nowme/
-  module/shared/
-    controller/     Auth controller and global exception handling
-    service/        Auth, JWT, and refresh token services
-    entity/         Refresh token entity
-    repository/     Refresh token repository
-    validation/     Custom validation helpers
+To run the server in Docker as well, use `docker compose up --build`.
 
-  module/user/
-    controller/     User and follow endpoints
-    service/        Profile, follow, and friendship logic
-    entity/         User and follow entities
-    repository/     User and follow repositories
-    dto/            Auth, profile, search, and avatar DTOs
+## Configuration
 
-  module/nowme/
-    controller/     Post, image, like, comment, history endpoints
-    service/        Post, access, image, like, and comment logic
-    entity/         NowMe post, like, and comment entities
-    repository/     Post, like, and comment repositories
-    dto/            Post, comment, and visibility DTOs
-```
+Settings come from environment variables or from `.env`.
 
-## Local Requirements
+| Variable | Default | Purpose |
+|---|---|---|
+| `JWT_SECRET` | — (required) | HMAC secret for signing tokens, 32+ characters |
+| `DB_URL` | `jdbc:postgresql://localhost:5435/nowme` | Database URL |
+| `DB_USERNAME` / `DB_PASSWORD` | `nowme` / `nowme` | Database credentials |
+| `SEED_ENABLED` | `true` | Fill an empty database with demo data |
+| `SEED_RESET` | `false` | Wipe **all** data and seed again on startup |
+| `SHOW_SQL` | `false` | Log SQL statements |
 
-- JDK 25.
-- Gradle wrapper from the project.
-- Docker, for the PostgreSQL container.
-
-Create a `.env` file in the repository root with a JWT signing secret (at least 32 characters). The backend refuses to start without it; both `docker compose` and the IDE / `./gradlew bootRun` read this file:
-
-```bash
-cp .env.example .env
-echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
-```
-
-Start PostgreSQL from the repository root:
-
-```bash
-docker compose up -d postgres
-```
-
-It listens on `localhost:5435` (bound to 127.0.0.1 only) with database `nowme`, user `nowme` and password `nowme`. The local profile is used by default:
-
-```properties
-spring.profiles.default=local
-server.port=25565
-spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5435/nowme}
-spring.datasource.username=${DB_USERNAME:nowme}
-spring.datasource.password=${DB_PASSWORD:nowme}
-```
-
-Override `DB_URL`, `DB_USERNAME` and `DB_PASSWORD` to point at another database. The application uses `spring.jpa.hibernate.ddl-auto=update`, so the schema is updated during development.
+PostgreSQL from `docker-compose.yml` listens only on `127.0.0.1:5435`. The schema is managed by Hibernate (`ddl-auto=update`). Uploaded images are stored in `uploads/` next to the working directory.
 
 ## Demo Data
 
-On startup the backend fills an **empty** database with demo data (`InitialDataSeeder`): 13 interlinked accounts, ~230 posts with real photos, follows, friendships, likes and comments. All dates are relative to the moment of seeding.
+On startup the server fills an **empty** database with 13 linked accounts. The data includes 200+ posts with real photos, follows, friendships, likes and comments. Dates are relative to the moment of seeding.
 
-Main demo account, with the most data (4 months of history in the calendar, 35-day streak, 6 pinned posts, 5 friends / 3 followers / 2 following):
+The main account has the most data: 4 months of calendar history, a 35-day streak, 6 pinned posts, friends and followers.
 
-- username: `nowme_star`
-- password: `Star2026!`
+- `nowme_star` / `Star2026!`
 
-Every other account uses the password `password123`:
+All other accounts use the password `password123`:
 
 | Account | Relation to `nowme_star` |
 |---|---|
 | `anna_k`, `leo.travels`, `mia_cooks`, `sam_runs`, `zoe.art` | friends (mutual follow) |
-| `ben_photo`, `kate_music` | followed by `nowme_star`, don't follow back (`ben_photo` has friends-only posts that must stay hidden) |
+| `ben_photo`, `kate_music` | followed by `nowme_star`, don't follow back; `ben_photo` has friends-only posts that must stay hidden |
 | `fan_tom`, `lucy_reads`, `olga_dev` | follow `nowme_star` |
-| `newbie_joe` | no posts, no follows (empty states) |
+| `newbie_joe` | no posts and no follows, for checking empty states |
 | `ghost_user` | deactivated, must not appear anywhere |
 
-Controls (environment variables):
+The feed only shows the last 7 days. When demo data gets old, restart once with `SEED_RESET=true`.
 
-- `SEED_ENABLED=false` turns seeding off (default `true`).
-- `SEED_RESET=true` **deletes all data** and seeds again. Use it when the feed gets stale: it only shows the last 7 days.
+Photo sources and licenses are listed in `nowme/src/main/resources/seed/photos/SOURCES.md`.
 
-The photos are in `nowme/src/main/resources/seed/photos` (sources and license in `SOURCES.md`) and are copied to `uploads/` as `seed_photo_*.jpg`.
+## How It Works
 
-## Running Locally
+- **Auth.** Logging in returns an access token, valid for 2 hours, and a refresh token, valid for 28 days. Each refresh rotates the refresh token. Protected endpoints expect `Authorization: Bearer <access token>`.
+- **Feed.** Shows posts from the last 7 days by you and the people you follow. Posts marked `FRIENDS_ONLY` are visible to mutual followers only.
+- **Uploads.** JPEG, PNG and WebP up to 15 MB are accepted. The type is checked from the file contents, and the server generates the file name.
+- **Errors.** Errors are returned as `{"error": "CODE"}` with a matching status: 400 for validation, 401 for auth, 403, 404, 409 for duplicates and 413 for files that are too large.
 
-From the backend module:
+## API
+
+| Area | Endpoints |
+|---|---|
+| Auth | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout` |
+| Posts | `GET /nowme` (feed), `POST /nowme` (multipart), `GET /nowme/{id}/image`, `GET /nowme/me/history`, `GET /nowme/users/{userId}`, `PUT /nowme/{id}/visibility`, `PUT /nowme/{id}/favorite`, `DELETE /nowme/{id}` |
+| Likes and comments | `POST`/`DELETE /nowme/{id}/like`, `GET`/`POST /nowme/{id}/comment` |
+| Users | `GET /users/me`, `/users/{id}`, `/users/username/{username}`, `/users/search`, `PUT /users/avatar` |
+| Follows | `POST`/`DELETE /follow/{userId}` |
+
+List endpoints accept `page` and `size`, with a maximum size of 50. See Swagger UI for request and response details.
+
+## Project Layout
+
+```text
+nowme/src/main/java/com/abik/nowme/
+  config/            current-user resolver, password encoder, OpenAPI
+  module/shared/     auth, JWT, refresh tokens, error handling, paging, demo data seeder
+  module/user/       profiles, search, avatars, follows
+  module/nowme/      posts, image storage, likes, comments, access rules
+```
+
+## Tests
+
+The tests need the PostgreSQL container to be running.
 
 ```bash
 cd nowme
-./gradlew bootRun
+./gradlew test
 ```
-
-On Windows:
-
-```powershell
-cd nowme
-.\gradlew.bat bootRun
-```
-
-After startup, the API is available at:
-
-```text
-http://localhost:25565/
-```
-
-## API Overview
-
-Authentication:
-
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `POST /auth/logout`
-
-NowMe posts:
-
-- `GET /nowme`
-- `POST /nowme`
-- `GET /nowme/{id}/image`
-- `GET /nowme/me/history`
-- `GET /nowme/users/{userId}`
-- `PUT /nowme/{id}/visibility`
-- `PUT /nowme/{id}/favorite`
-- `DELETE /nowme/{id}`
-
-Likes and comments:
-
-- `POST /nowme/{id}/like`
-- `DELETE /nowme/{id}/like`
-- `GET /nowme/{id}/comment`
-- `POST /nowme/{id}/comment`
-
-Users and follows:
-
-- `GET /users/me`
-- `GET /users/{id}`
-- `GET /users/username/{username}`
-- `GET /users/search`
-- `PUT /users/avatar`
-- `POST /follow/{userId}`
-- `DELETE /follow/{userId}`
-
-## Interactive API Documentation (Swagger UI)
-
-When the server is running, the interactive OpenAPI 3 / Swagger documentation and testing UI is accessible at:
-
-```text
-http://localhost:25565/swagger-ui.html
-```
-
-Raw OpenAPI JSON specification:
-
-```text
-http://localhost:25565/api-docs
-```
-
-## Running with Docker
-
-You can run the application and PostgreSQL containerized using Docker Compose:
-
-```bash
-docker compose up --build
-```
-
-## Relationship With The Android App
-
-The Android app depends on this backend for every core action:
-
-- login and registration;
-- token refresh;
-- loading the feed;
-- uploading camera photos;
-- opening post images;
-- liking and commenting;
-- following users;
-- loading profiles and history.
-
-Because both projects were built together, the DTOs and endpoint names are intentionally close on both sides. This makes the project easier to understand, test, and extend.
